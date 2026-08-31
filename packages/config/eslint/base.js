@@ -46,7 +46,10 @@ export const baseConfig = tseslint.config(
       '@typescript-eslint/no-misused-promises': 'error',
       '@typescript-eslint/await-thenable': 'error',
       '@typescript-eslint/require-await': 'error',
-      '@typescript-eslint/return-await': ['error', 'always'],
+      // 'in-try-catch', not 'always': Fastify instances and replies are
+      // thenable, so 'always' fires on every `return reply.send(...)`. Inside
+      // try/catch is where the await genuinely matters for stack traces.
+      '@typescript-eslint/return-await': ['error', 'in-try-catch'],
 
       // --- Type hygiene -------------------------------------------------
       '@typescript-eslint/no-unnecessary-condition': 'warn',
@@ -73,6 +76,14 @@ export const baseConfig = tseslint.config(
       'prefer-const': 'error',
       'no-var': 'error',
     },
+  },
+
+  {
+    // Fastify's typed plugin signatures (FastifyPluginAsync*) require an async
+    // function whether or not the body awaits anything.
+    name: 'game-library/fastify-plugins',
+    files: ['**/*.routes.ts', '**/plugins/**/*.ts'],
+    rules: { '@typescript-eslint/require-await': 'off' },
   },
 
   {

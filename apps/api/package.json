@@ -5,15 +5,37 @@
   "type": "module",
   "description": "Fastify HTTP API — the only process that touches the database",
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --project unit --passWithNoTests",
+    "test:integration": "vitest run --project integration",
+    "test:watch": "vitest"
   },
   "dependencies": {
+    "@fastify/cors": "catalog:",
+    "@fastify/helmet": "catalog:",
+    "@fastify/rate-limit": "catalog:",
+    "@fastify/swagger": "catalog:",
+    "@fastify/swagger-ui": "catalog:",
     "@game-library/db": "workspace:*",
-    "@game-library/shared": "workspace:*"
+    "@game-library/shared": "workspace:*",
+    "close-with-grace": "catalog:",
+    "dotenv": "catalog:",
+    "fastify": "catalog:",
+    "fastify-plugin": "catalog:",
+    "fastify-type-provider-zod": "catalog:",
+    "ioredis": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
+    "@testcontainers/postgresql": "catalog:",
+    "@testcontainers/redis": "catalog:",
     "@types/node": "catalog:",
+    "pino": "catalog:",
+    "pino-pretty": "catalog:",
     "tsx": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

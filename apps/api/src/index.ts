@@ -1,16 +1,40 @@
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+import closeWithGrace from 'close-with-grace'
+import { config } from 'dotenv'
+
+import { loadEnv } from './env.js'
+import { buildServer } from './server.js'
+
 /**
- * Process entrypoint for the API.
+ * Load the repo-root .env before anything reads process.env.
  *
- * Increment 4 replaces this with the real bootstrap: parse the environment
- * with Zod (exiting on invalid config), build the Fastify instance via
- * buildServer(), bind the port, and wire graceful shutdown.
- *
- * The layering rules this app must follow are in docs/architecture.md §5 and
- * AGENTS.md — in particular, every repository function takes userId first.
+ * Local convenience only — in Docker the environment is passed directly and no
+ * .env exists. ENV_FILE overrides the path (point it at a nonexistent file to
+ * opt out entirely), which is also what lets boot tests assert on a genuinely
+ * empty environment rather than silently picking up the developer's .env.
  */
+const envFile =
+  process.env.ENV_FILE ?? resolve(dirname(fileURLToPath(import.meta.url)), '../../../.env')
+config({ path: envFile, quiet: true })
 
-import { slugify } from '@game-library/shared'
+// Exits with a readable message if anything is missing or malformed.
+const env = loadEnv()
 
-export function describeService(): string {
-  return `game-library-api (${slugify('Game Library API')})`
+const app = await buildServer(env)
+
+// Drain in-flight requests, then close Postgres and Redis, before exiting.
+closeWithGrace({ delay: 10_000 }, async ({ err }) => {
+  if (err) {
+    app.log.error({ err }, 'shutting down after fatal error')
+  }
+  await app.close()
+})
+
+try {
+  await app.listen({ host: env.API_HOST, port: env.API_PORT })
+} catch (error) {
+  app.log.fatal({ err: error }, 'failed to start')
+  process.exit(1)
 }

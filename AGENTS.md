@@ -15,7 +15,7 @@ Two facts shape everything:
 2. Identity across library and wishlist is the **IGDB id** → that is what makes duplicate
    detection reliable rather than fuzzy title matching.
 
-**Status:** roadmap increments 1–3 complete (workspace skeleton + tooling; Docker Compose infrastructure; Drizzle schema + first migration). Increment 4 (Fastify skeleton) is next.
+**Status:** roadmap increments 1–4 complete (tooling; Docker infra; Drizzle schema + migration; Fastify skeleton). Increment 5 (Better Auth + per-user seeding) is next.
 
 ## Documentation map
 
@@ -101,6 +101,7 @@ pnpm db:generate              # schema change → SQL migration (review the outp
 pnpm db:migrate               # apply
 pnpm db:seed                  # dev dataset
 pnpm dev                      # api :4000 + web :3000
+pnpm test:integration         # Testcontainers — needs Docker running
 pnpm test                     # unit
 pnpm test:integration         # Testcontainers — needs Docker
 pnpm test:e2e                 # Playwright
