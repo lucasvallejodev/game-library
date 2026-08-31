@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "// note": "Root config exists so editors and ESLint's projectService can resolve a project for loose files (eslint.config.js, prettier.config.js). Each package typechecks with its own tsconfig via `pnpm typecheck`.",
+  "extends": "./packages/config/tsconfig/node.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false
+  },
+  "include": ["*.js", "*.ts"],
+  "exclude": ["node_modules", "apps", "packages"]
+}

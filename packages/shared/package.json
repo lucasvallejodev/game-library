@@ -1,0 +1,21 @@
+{
+  "name": "@game-library/shared",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Zod schemas, domain types and pure helpers shared by the API and the web app",
+  "exports": {
+    ".": "./src/index.ts",
+    "./text": "./src/text.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@game-library/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Next.js frontend — dark slate library UI",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@game-library/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "game-library",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Self-hosted library for tracking games across platforms, with a duplicate-purchase-preventing wishlist",
+  "packageManager": "pnpm@11.24.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel --if-present dev",
+    "build": "pnpm -r --if-present build",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "test:watch": "pnpm -r --parallel --if-present test:watch",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "pnpm lint && pnpm typecheck && pnpm test",
+    "clean": "pnpm -r --if-present clean && rimraf node_modules"
+  },
+  "devDependencies": {
+    "@game-library/config": "workspace:*",
+    "eslint": "catalog:",
+    "prettier": "catalog:",
+    "typescript": "catalog:"
+  }
+}

@@ -1,0 +1,30 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+allowBuilds:
+  esbuild: true
+
+# Single source of truth for dependency versions across every workspace package.
+# Packages reference these with "catalog:" instead of repeating a range.
+# See docs/adr.md ADR-002 (monorepo) and the TypeScript note below.
+catalog:
+  # --- Language & runtime -------------------------------------------------
+  # Pinned to the 5.x line deliberately: typescript-eslint declares
+  # `typescript: >=4.8.4 <6.1.0`, so TypeScript 7 (the native Go compiler)
+  # would cost us all type-aware lint rules. Revisit when typescript-eslint
+  # ships TS 7 support.
+  typescript: 5.9.3
+  '@types/node': 26.4.0
+  tsx: 4.23.13
+
+  # --- Lint & format ------------------------------------------------------
+  eslint: 10.9.1
+  '@eslint/js': 10.0.1
+  typescript-eslint: 8.68.0
+  eslint-config-prettier: 10.1.8
+  globals: 17.11.0
+  prettier: 3.9.6
+
+  # --- Test ---------------------------------------------------------------
+  vitest: 4.1.11
