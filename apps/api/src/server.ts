@@ -3,6 +3,7 @@ import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod
 
 import type { Env } from './env.js'
 import { healthRoutes } from './modules/health/health.routes.js'
+import { mediaRoutes } from './modules/media/media.routes.js'
 import { taxonomyRoutes } from './modules/taxonomy/taxonomy.routes.js'
 import authPlugin from './plugins/auth.js'
 import configPlugin from './plugins/config.js'
@@ -10,6 +11,7 @@ import dbPlugin from './plugins/db.js'
 import errorsPlugin from './plugins/errors.js'
 import redisPlugin from './plugins/redis.js'
 import securityPlugin from './plugins/security.js'
+import storagePlugin from './plugins/storage.js'
 import swaggerPlugin from './plugins/swagger.js'
 
 /**
@@ -79,10 +81,12 @@ export async function buildServer(env: Env): Promise<FastifyInstance> {
   await app.register(redisPlugin)
   await app.register(securityPlugin)
   await app.register(authPlugin)
+  await app.register(storagePlugin)
   await app.register(swaggerPlugin)
 
   await app.register(healthRoutes)
   await app.register(taxonomyRoutes)
+  await app.register(mediaRoutes)
 
   // Deliberately NOT calling app.ready() here: readying freezes the route
   // table, and tests need to register throwaway routes (e.g. to exercise

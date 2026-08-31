@@ -62,6 +62,7 @@ export interface TaxonomyRepository {
       values: Partial<{ name: string; slug: string; color: string; sortOrder: number }>,
     ) => Promise<boolean>
     remove: (userId: string, id: string) => Promise<boolean>
+    setLogo: (userId: string, id: string, assetId: string | null) => Promise<boolean>
   }
   gameTypes: {
     list: (userId: string) => Promise<GameTypeRow[]>
@@ -179,6 +180,15 @@ export function createTaxonomyRepository(db: Database): TaxonomyRepository {
       remove: async (userId, id) => {
         const rows = await db
           .delete(locations)
+          .where(and(eq(locations.userId, userId), eq(locations.id, id)))
+          .returning({ id: locations.id })
+        return rows.length > 0
+      },
+
+      setLogo: async (userId, id, assetId) => {
+        const rows = await db
+          .update(locations)
+          .set({ logoAssetId: assetId, updatedAt: new Date() })
           .where(and(eq(locations.userId, userId), eq(locations.id, id)))
           .returning({ id: locations.id })
         return rows.length > 0

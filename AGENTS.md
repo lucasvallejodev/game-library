@@ -15,7 +15,7 @@ Two facts shape everything:
 2. Identity across library and wishlist is the **IGDB id** → that is what makes duplicate
    detection reliable rather than fuzzy title matching.
 
-**Status:** roadmap increments 1–6 complete (tooling; Docker infra; schema + migrations; Fastify skeleton; Better Auth + seeding; taxonomy CRUD). Increment 7 (storage service + local fallback) is next.
+**Status:** roadmap increments 1–7 complete (tooling; Docker infra; schema + migrations; Fastify skeleton; Better Auth + seeding; taxonomy CRUD; storage + local fallback). Increment 8 (games CRUD + filtering) is next.
 
 ## Documentation map
 

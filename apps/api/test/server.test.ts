@@ -27,7 +27,7 @@ describe('health', () => {
     expect(res.statusCode).toBe(200)
     expect(res.json()).toEqual({
       status: 'ok',
-      dependencies: { database: true, redis: true },
+      dependencies: { database: true, redis: true, storage: true },
     })
   })
 

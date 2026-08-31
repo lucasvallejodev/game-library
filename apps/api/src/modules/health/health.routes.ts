@@ -4,6 +4,7 @@ import { z } from 'zod'
 const dependencySchema = z.object({
   database: z.boolean(),
   redis: z.boolean(),
+  storage: z.boolean(),
 })
 
 const liveSchema = z.object({
@@ -49,14 +50,23 @@ export const healthRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (_request, reply) => {
-      const [database, redis] = await Promise.all([app.dbPing(), app.redisPing()])
-      const ok = database && redis
+      const [database, redis, storage] = await Promise.all([
+        app.dbPing(),
+        app.redisPing(),
+        app.storage.healthy(),
+      ])
 
-      // 503 so orchestrators stop routing traffic here while a dependency is
-      // down, without killing the process.
+      /**
+       * Storage counts as degraded, not dead: with the local fallback
+       * configured the API still accepts uploads when S3 is unreachable. The
+       * 503 tells an orchestrator to stop routing here without killing the
+       * process. See docs/architecture.md §7.
+       */
+      const ok = database && redis && storage
+
       return reply.status(ok ? 200 : 503).send({
         status: ok ? ('ok' as const) : ('degraded' as const),
-        dependencies: { database, redis },
+        dependencies: { database, redis, storage },
       })
     },
   )

@@ -17,6 +17,9 @@ import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 
 import { currentUserId } from '../../auth/current-user.js'
+import { ValidationError } from '../../errors.js'
+import { createMediaRepository } from '../media/media.repository.js'
+import { createMediaService } from '../media/media.service.js'
 import { createTaxonomyRepository } from './taxonomy.repository.js'
 import { createTaxonomyService } from './taxonomy.service.js'
 
@@ -32,6 +35,12 @@ import { createTaxonomyService } from './taxonomy.service.js'
  */
 export const taxonomyRoutes: FastifyPluginAsyncZod = async (app) => {
   const service = createTaxonomyService(createTaxonomyRepository(app.db))
+  const media = createMediaService({
+    repo: createMediaRepository(app.db),
+    storage: app.storage,
+    maxUploadBytes: app.config.MAX_UPLOAD_BYTES,
+    log: app.log,
+  })
 
   /**
    * Every route here requires a session, enforced at `onRequest` rather than
@@ -112,6 +121,34 @@ export const taxonomyRoutes: FastifyPluginAsyncZod = async (app) => {
     async (request, reply) => {
       await service.locations.remove(currentUserId(request), request.params.id)
       return reply.status(204).send(null)
+    },
+  )
+
+  app.post(
+    '/api/locations/:id/logo',
+    {
+      schema: {
+        tags: ['taxonomy'],
+        summary: 'Upload a location logo (multipart, field `file`)',
+        params: idParamSchema,
+        consumes: ['multipart/form-data'],
+        response: { 200: locationSchema },
+      },
+    },
+    async (request) => {
+      const userId = currentUserId(request)
+
+      const upload = await request.file()
+      if (!upload) {
+        throw new ValidationError('Expected a multipart upload with a `file` field')
+      }
+
+      // toBuffer() enforces the per-file limit configured on @fastify/multipart
+      // and throws once it is exceeded, so an oversized upload never lands.
+      const bytes = await upload.toBuffer()
+
+      const asset = await media.storeImage(userId, bytes, { source: 'upload' })
+      return service.locations.attachLogo(userId, request.params.id, asset.id)
     },
   )
 

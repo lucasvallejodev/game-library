@@ -13,13 +13,17 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "catalog:",
     "@fastify/cors": "catalog:",
     "@fastify/helmet": "catalog:",
+    "@fastify/multipart": "catalog:",
     "@fastify/rate-limit": "catalog:",
     "@fastify/swagger": "catalog:",
     "@fastify/swagger-ui": "catalog:",
     "better-auth": "catalog:",
     "drizzle-orm": "catalog:",
+    "file-type": "catalog:",
+    "sharp": "catalog:",
     "@game-library/db": "workspace:*",
     "@game-library/shared": "workspace:*",
     "close-with-grace": "catalog:",
@@ -36,6 +40,7 @@
     "@types/node": "catalog:",
     "pino": "catalog:",
     "pino-pretty": "catalog:",
+    "testcontainers": "catalog:",
     "tsx": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

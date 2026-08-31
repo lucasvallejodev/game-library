@@ -86,6 +86,7 @@ export interface TaxonomyService {
     create: (userId: string, input: CreateLocationInput) => Promise<Location>
     update: (userId: string, id: string, input: UpdateLocationInput) => Promise<Location>
     remove: (userId: string, id: string) => Promise<void>
+    attachLogo: (userId: string, id: string, assetId: string) => Promise<Location>
   }
   gameTypes: {
     list: (userId: string) => Promise<GameType[]>
@@ -164,6 +165,14 @@ export function createTaxonomyService(repo: TaxonomyRepository): TaxonomyService
         // The games themselves survive — see docs/api-endpoints.md.
         const deleted = await repo.locations.remove(userId, id)
         if (!deleted) throw new NotFoundError('Location')
+      },
+
+      attachLogo: async (userId, id, assetId) => {
+        const updated = await repo.locations.setLogo(userId, id, assetId)
+        if (!updated) throw new NotFoundError('Location')
+        const row = await repo.locations.findById(userId, id)
+        if (!row) throw new NotFoundError('Location')
+        return toLocation(row)
       },
     },
 
