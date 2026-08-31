@@ -1,0 +1,98 @@
+// =============================================================================
+// Design tokens — the ONLY place raw colour values are allowed.
+// Every other file uses these. See AGENTS.md rule 5.
+//
+// Values are sampled from docs/img/game_library_reference.webp, which informs
+// colour, typography and layout feel only — never features. See ADR-013.
+// =============================================================================
+
+// ── Surfaces ─────────────────────────────────────────────────────────────────
+// The reference layers three greys: a near-black page behind a dark shell, with
+// the sidebar a shade darker than the content pane. That separation is what
+// makes the sidebar read as chrome rather than content.
+$color-bg-base: #131417; // page backdrop, behind the shell
+$color-bg-sidebar: #1b1c20; // left nav
+$color-bg-surface: #202226; // main content pane
+$color-bg-elevated: #2a2d32; // cards, toolbar, inputs
+$color-bg-hover: #32363c;
+$color-bg-active: #3a3f46;
+
+// ── Borders ──────────────────────────────────────────────────────────────────
+$color-border: #2e3238;
+$color-border-strong: #3d424a;
+
+// ── Text ─────────────────────────────────────────────────────────────────────
+$color-text-primary: #f2f4f7;
+$color-text-secondary: #9aa1ab;
+$color-text-muted: #6b717a; // uppercase group labels only — fails AA at body size
+
+// ── Accent & status ──────────────────────────────────────────────────────────
+$color-accent: #2f9bff; // the reference blue
+$color-accent-hover: #55afff;
+$color-accent-subtle: rgba(47, 155, 255, 0.14);
+$color-success: #3fbf7f;
+$color-warning: #e8a33d;
+$color-danger: #e5484d;
+$color-danger-subtle: rgba(229, 72, 77, 0.12);
+
+// ── Typography ───────────────────────────────────────────────────────────────
+$font-sans:
+  var(--font-inter),
+  -apple-system,
+  BlinkMacSystemFont,
+  "Segoe UI",
+  roboto,
+  sans-serif;
+
+$fs-xs: 0.75rem;
+$fs-sm: 0.8125rem;
+$fs-base: 0.875rem;
+$fs-md: 1rem;
+$fs-lg: 1.25rem;
+$fs-xl: 1.5rem;
+$fs-2xl: 2rem;
+
+$fw-regular: 400;
+$fw-medium: 500;
+$fw-semibold: 600;
+
+$lh-tight: 1.2;
+$lh-normal: 1.5;
+
+// ── Space (4px scale) ────────────────────────────────────────────────────────
+$space-1: 0.25rem;
+$space-2: 0.5rem;
+$space-3: 0.75rem;
+$space-4: 1rem;
+$space-5: 1.25rem;
+$space-6: 1.5rem;
+$space-8: 2rem;
+$space-10: 2.5rem;
+$space-12: 3rem;
+
+// ── Radii & shadows ──────────────────────────────────────────────────────────
+$radius-sm: 4px;
+$radius-md: 6px;
+$radius-lg: 10px;
+$radius-full: 999px;
+
+$shadow-card: 0 2px 8px rgb(0 0 0 / 35%);
+$shadow-popover: 0 8px 28px rgb(0 0 0 / 50%);
+
+// ── Layout ───────────────────────────────────────────────────────────────────
+$sidebar-width: 232px;
+$sidebar-rail-width: 64px;
+$topbar-height: 60px;
+$cover-aspect: 3 / 4; // portrait, as in the reference
+$card-min-width: 190px;
+$content-max-width: 1600px;
+
+// ── Motion ───────────────────────────────────────────────────────────────────
+$transition-fast: 120ms ease;
+$transition-base: 180ms ease;
+
+// ── Layers ───────────────────────────────────────────────────────────────────
+$z-sidebar: 50;
+$z-dropdown: 100;
+$z-modal: 200;
+$z-toast: 300;

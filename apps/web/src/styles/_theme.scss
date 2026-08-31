@@ -1,0 +1,48 @@
+@use "./tokens" as *;
+
+/**
+ * Tokens re-exposed as CSS custom properties.
+ *
+ * SCSS variables are compile-time and cannot cross into a Radix portal, which
+ * renders outside the component tree. They also cannot carry a runtime value —
+ * and a location's colour is user-chosen hex from the database, so it can only
+ * arrive as an inline custom property.
+ *
+ * Rule: SCSS variables for static design decisions, CSS custom properties for
+ * anything portalled or runtime-dynamic.
+ */
+:root {
+  --color-bg-base: #{$color-bg-base};
+  --color-bg-sidebar: #{$color-bg-sidebar};
+  --color-bg-surface: #{$color-bg-surface};
+  --color-bg-elevated: #{$color-bg-elevated};
+  --color-bg-hover: #{$color-bg-hover};
+  --color-bg-active: #{$color-bg-active};
+
+  --color-border: #{$color-border};
+  --color-border-strong: #{$color-border-strong};
+
+  --color-text-primary: #{$color-text-primary};
+  --color-text-secondary: #{$color-text-secondary};
+  --color-text-muted: #{$color-text-muted};
+
+  --color-accent: #{$color-accent};
+  --color-accent-hover: #{$color-accent-hover};
+  --color-accent-subtle: #{$color-accent-subtle};
+  --color-success: #{$color-success};
+  --color-warning: #{$color-warning};
+  --color-danger: #{$color-danger};
+
+  --radius-sm: #{$radius-sm};
+  --radius-md: #{$radius-md};
+  --radius-lg: #{$radius-lg};
+
+  --shadow-popover: #{$shadow-popover};
+
+  --transition-fast: #{$transition-fast};
+  --transition-base: #{$transition-base};
+
+  // The app is dark-only by design (see the reference). Declaring the scheme
+  // makes the browser paint native form controls and scrollbars to match.
+  color-scheme: dark;
+}

@@ -1,0 +1,22 @@
+// The single global stylesheet, imported once in app/layout.tsx.
+// Everything else is a co-located *.module.scss.
+
+@use "./reset";
+@use "./theme";
+@use "./tokens" as *;
+@use "./mixins" as *;
+
+body {
+  @include custom-scrollbar;
+}
+
+// Radix sets data-scroll-locked on <body> while a modal is open. Without this
+// the page shifts sideways as the scrollbar disappears.
+body[data-scroll-locked] {
+  overflow: hidden;
+}
+
+::selection {
+  background-color: $color-accent-subtle;
+  color: $color-text-primary;
+}

@@ -1,0 +1,39 @@
+@use "styles/tokens" as *;
+@use "styles/mixins" as *;
+@use "styles/breakpoints" as *;
+
+.shell {
+  display: flex;
+  min-height: 100dvh;
+  background-color: $color-bg-base;
+
+  &__main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    gap: $space-4;
+    padding: $space-5;
+    background-color: $color-bg-surface;
+
+    @include below($bp-md) {
+      padding: $space-3;
+    }
+  }
+
+  &__mobile-bar {
+    display: none;
+
+    @include below($bp-md) {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    max-width: $content-max-width;
+  }
+}

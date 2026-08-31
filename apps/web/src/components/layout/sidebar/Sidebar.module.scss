@@ -1,0 +1,140 @@
+@use "styles/tokens" as *;
+@use "styles/mixins" as *;
+@use "styles/breakpoints" as *;
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: $sidebar-width;
+  flex-shrink: 0;
+  height: 100dvh;
+  padding: $space-5 $space-3;
+  gap: $space-5;
+  background-color: $color-bg-sidebar;
+  border-right: 1px solid $color-border;
+  overflow-y: auto;
+
+  @include custom-scrollbar;
+
+  // Below md the shell renders a drawer instead; this just gets out of the way.
+  @include below($bp-md) {
+    display: none;
+  }
+
+  &__profile {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    padding: 0 $space-2;
+  }
+
+  &__avatar {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: $radius-full;
+    object-fit: cover;
+    background-color: $color-bg-elevated;
+  }
+
+  &__avatar-fallback {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: $radius-full;
+    background-color: $color-accent-subtle;
+    color: $color-accent;
+    font-size: $fs-base;
+    font-weight: $fw-semibold;
+  }
+
+  &__identity {
+    min-width: 0;
+  }
+
+  &__name {
+    @include truncate;
+
+    font-size: $fs-sm;
+    font-weight: $fw-semibold;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: $color-text-primary;
+  }
+
+  &__meta {
+    @include truncate;
+
+    font-size: $fs-xs;
+    color: $color-text-secondary;
+  }
+
+  &__nav {
+    display: flex;
+    flex-direction: column;
+    gap: $space-5;
+  }
+
+  &__group {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1;
+  }
+
+  &__group-label {
+    @include section-label;
+
+    padding: 0 $space-2 $space-1;
+  }
+
+  &__footer {
+    margin-top: auto;
+    padding-top: $space-4;
+    border-top: 1px solid $color-border;
+  }
+}
+
+.nav-item {
+  @include focus-ring(-2px);
+
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-2 $space-2;
+  border-radius: $radius-sm;
+  font-size: $fs-base;
+  color: $color-text-secondary;
+  transition:
+    background-color $transition-fast,
+    color $transition-fast;
+
+  &:hover {
+    background-color: $color-bg-hover;
+    color: $color-text-primary;
+  }
+
+  &__icon {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+  }
+
+  &__label {
+    @include truncate;
+  }
+
+  &__count {
+    margin-left: auto;
+    font-size: $fs-xs;
+    font-variant-numeric: tabular-nums;
+    color: $color-text-muted;
+  }
+
+  &--active {
+    background-color: $color-bg-active;
+    color: $color-text-primary;
+    font-weight: $fw-medium;
+  }
+}

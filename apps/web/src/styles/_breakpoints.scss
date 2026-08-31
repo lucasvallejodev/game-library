@@ -1,0 +1,19 @@
+// Mobile-first: base styles target small screens, `above()` adds from there.
+// `below()` exists for the handful of cases that genuinely need to subtract.
+
+$bp-sm: 640px;
+$bp-md: 768px;
+$bp-lg: 1024px;
+$bp-xl: 1280px;
+
+@mixin above($breakpoint) {
+  @media (min-width: $breakpoint) {
+    @content;
+  }
+}
+
+@mixin below($breakpoint) {
+  @media (max-width: ($breakpoint - 0.02px)) {
+    @content;
+  }
+}

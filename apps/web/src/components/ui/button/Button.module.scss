@@ -1,0 +1,74 @@
+@use "styles/tokens" as *;
+@use "styles/mixins" as *;
+
+.button {
+  @include focus-ring;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-2;
+  padding: $space-2 $space-4;
+  border-radius: $radius-sm;
+  font-size: $fs-base;
+  font-weight: $fw-medium;
+  white-space: nowrap;
+  transition:
+    background-color $transition-fast,
+    color $transition-fast,
+    opacity $transition-fast;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  &--primary {
+    background-color: $color-accent;
+    color: #fff;
+
+    &:hover:not(:disabled) {
+      background-color: $color-accent-hover;
+    }
+  }
+
+  &--secondary {
+    background-color: $color-bg-elevated;
+    color: $color-text-primary;
+    border: 1px solid $color-border;
+
+    &:hover:not(:disabled) {
+      background-color: $color-bg-hover;
+      border-color: $color-border-strong;
+    }
+  }
+
+  &--ghost {
+    color: $color-text-secondary;
+
+    &:hover:not(:disabled) {
+      background-color: $color-bg-hover;
+      color: $color-text-primary;
+    }
+  }
+
+  &--danger {
+    background-color: $color-danger-subtle;
+    color: $color-danger;
+
+    &:hover:not(:disabled) {
+      background-color: $color-danger;
+      color: #fff;
+    }
+  }
+
+  &--block {
+    width: 100%;
+  }
+}

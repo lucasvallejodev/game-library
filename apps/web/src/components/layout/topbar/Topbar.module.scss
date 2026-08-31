@@ -1,0 +1,65 @@
+@use "styles/tokens" as *;
+@use "styles/mixins" as *;
+@use "styles/breakpoints" as *;
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  min-height: $topbar-height;
+  padding: $space-3 $space-5;
+  background-color: $color-bg-elevated;
+  border-radius: $radius-md;
+
+  &__title {
+    font-size: $fs-md;
+    font-weight: $fw-semibold;
+    color: $color-text-primary;
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+  }
+
+  // Pushes the icon cluster to the right edge, as in the reference toolbar.
+  &__spacer {
+    flex: 1;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: $space-1;
+  }
+}
+
+.icon-button {
+  @include focus-ring;
+
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: $radius-sm;
+  color: $color-text-secondary;
+  transition:
+    background-color $transition-fast,
+    color $transition-fast;
+
+  &:hover {
+    background-color: $color-bg-hover;
+    color: $color-text-primary;
+  }
+
+  &--active {
+    background-color: $color-bg-active;
+    color: $color-text-primary;
+  }
+
+  svg {
+    width: 17px;
+    height: 17px;
+  }
+}

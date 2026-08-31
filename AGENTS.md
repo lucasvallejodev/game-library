@@ -15,7 +15,7 @@ Two facts shape everything:
 2. Identity across library and wishlist is the **IGDB id** → that is what makes duplicate
    detection reliable rather than fuzzy title matching.
 
-**Status:** roadmap increments 1–9 complete — the whole backend. Tooling; Docker infra; schema + migrations; Fastify skeleton; Better Auth + seeding; taxonomy CRUD; storage + S3/local fallback; games CRUD + filtering; IGDB integration (verified against the live API). Increment 10 (Next.js web shell) is next — the first frontend work.
+**Status:** roadmap increments 1–9 complete — the whole backend. Tooling; Docker infra; schema + migrations; Fastify skeleton; Better Auth + seeding; taxonomy CRUD; storage + S3/local fallback; games CRUD + filtering; IGDB integration (verified against the live API). Increment 10 (Next.js web shell, SCSS layer, auth pages) is complete. Increment 11 (Library view: game grid, filter bar, add dialog) is next.
 
 ## Documentation map
 
@@ -94,6 +94,11 @@ works.
 
 **Imports** — `@/` path aliases within an app; workspace packages by name
 (`@game-library/shared`). SCSS partials via `@use`, never `@import`.
+
+**SCSS resolution (web)** — component modules use `@use 'styles/tokens'` (bare, resolved by
+`sassOptions.loadPaths`), and files _inside_ `src/styles/` use `@use './tokens'`. Do **not** use
+the `@/` alias in SCSS: once a stylesheet is loaded through the alias importer, sass can no
+longer resolve that file's own siblings.
 
 **Commits** — Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`).
 

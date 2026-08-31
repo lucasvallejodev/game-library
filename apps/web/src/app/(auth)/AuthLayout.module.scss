@@ -1,0 +1,139 @@
+@use "styles/tokens" as *;
+@use "styles/mixins" as *;
+
+.auth {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  padding: $space-6;
+  background-color: $color-bg-base;
+
+  &__card {
+    width: 100%;
+    max-width: 400px;
+    padding: $space-8;
+    background-color: $color-bg-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-card;
+  }
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    margin-bottom: $space-6;
+    color: $color-accent;
+
+    svg {
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  &__brand-name {
+    font-size: $fs-md;
+    font-weight: $fw-semibold;
+    color: $color-text-primary;
+  }
+
+  &__title {
+    font-size: $fs-xl;
+    margin-bottom: $space-2;
+  }
+
+  &__subtitle {
+    font-size: $fs-base;
+    color: $color-text-secondary;
+    margin-bottom: $space-6;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+  }
+
+  &__label {
+    font-size: $fs-sm;
+    font-weight: $fw-medium;
+    color: $color-text-secondary;
+  }
+
+  &__input {
+    @include focus-ring(0);
+
+    padding: $space-3;
+    font-size: $fs-base;
+    color: $color-text-primary;
+    background-color: $color-bg-elevated;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    transition: border-color $transition-fast;
+
+    &::placeholder {
+      color: $color-text-muted;
+    }
+
+    &:focus {
+      border-color: $color-accent;
+    }
+
+    &[aria-invalid="true"] {
+      border-color: $color-danger;
+    }
+  }
+
+  &__hint {
+    font-size: $fs-xs;
+    color: $color-text-muted;
+  }
+
+  &__error {
+    padding: $space-3;
+    font-size: $fs-sm;
+    color: $color-danger;
+    background-color: $color-danger-subtle;
+    border-radius: $radius-sm;
+  }
+
+  &__divider {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    margin: $space-5 0;
+    font-size: $fs-xs;
+    color: $color-text-muted;
+
+    &::before,
+    &::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background-color: $color-border;
+    }
+  }
+
+  &__footer {
+    margin-top: $space-6;
+    font-size: $fs-sm;
+    color: $color-text-secondary;
+    text-align: center;
+  }
+
+  &__link {
+    @include focus-ring;
+
+    color: $color-accent;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

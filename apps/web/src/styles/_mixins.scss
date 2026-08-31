@@ -1,0 +1,87 @@
+@use "./tokens" as *;
+@use "./breakpoints" as *;
+
+/// Single-line ellipsis.
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/// Clamp to N lines.
+@mixin line-clamp($lines: 2) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: $lines;
+  overflow: hidden;
+}
+
+/// Visible keyboard focus. Never remove an outline without a replacement.
+@mixin focus-ring($offset: 2px) {
+  &:focus-visible {
+    outline: 2px solid $color-accent;
+    outline-offset: $offset;
+  }
+}
+
+/// The responsive cover grid. Cards size themselves; the grid just flows.
+@mixin card-grid($min: $card-min-width) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax($min, 1fr));
+  gap: $space-5;
+
+  @include below($bp-md) {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: $space-3;
+  }
+}
+
+/// The uppercase muted group label from the reference sidebar.
+@mixin section-label {
+  font-size: $fs-xs;
+  font-weight: $fw-semibold;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $color-text-muted;
+}
+
+/// Visually hidden, still read by screen readers.
+@mixin visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/// Thin scrollbar that matches the dark shell instead of the OS default.
+@mixin custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: $color-border-strong transparent;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: $color-border-strong;
+    border-radius: $radius-full;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+/// Radix popover/dropdown surface: shared so every menu looks like one system.
+@mixin popover-surface {
+  background-color: $color-bg-elevated;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  box-shadow: $shadow-popover;
+}
