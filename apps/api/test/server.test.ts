@@ -92,7 +92,9 @@ describe('security headers and CORS', () => {
 })
 
 describe('openapi', () => {
-  it('generates a spec from the route schemas', () => {
+  it('generates a spec from the route schemas', async () => {
+    // swagger() needs a readied instance; buildServer leaves that to callers.
+    await s.app.ready()
     const spec = s.app.swagger()
 
     expect(spec.info.title).toBe('Game Library API')

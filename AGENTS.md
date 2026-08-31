@@ -15,7 +15,7 @@ Two facts shape everything:
 2. Identity across library and wishlist is the **IGDB id** → that is what makes duplicate
    detection reliable rather than fuzzy title matching.
 
-**Status:** roadmap increments 1–4 complete (tooling; Docker infra; Drizzle schema + migration; Fastify skeleton). Increment 5 (Better Auth + per-user seeding) is next.
+**Status:** roadmap increments 1–5 complete (tooling; Docker infra; schema + migrations; Fastify skeleton; Better Auth + per-user seeding). Increment 6 (taxonomy CRUD) is next.
 
 ## Documentation map
 
@@ -71,7 +71,13 @@ works.
 12. **Never run `git commit`, `git push`, or `git tag`.** At the end of each roadmap phase,
     **propose a commit message and stop.** The owner decides whether and when to commit. Staging
     is also the owner's call — do not `git add` on their behalf. → see _Committing_ below
-13. **The reference image is a styling reference only** — colors, typography, and part of the
+13. **Never hand-edit the Better Auth tables** (`user`, `session`, `account`, `verification`).
+    Diff them against `@better-auth/core`'s `dist/db/get-tables.mjs` — writing them from memory
+    omitted `account.issuer` and broke every sign-up. → [ADR-017](docs/adr.md)
+14. **Account seeding must stay idempotent.** It is not transactional (Better Auth's Drizzle
+    adapter has none), so re-runnability is the recovery mechanism. Never make
+    `seedUserDefaults` throw on conflict. → [ADR-016](docs/adr.md)
+15. **The reference image is a styling reference only** — colors, typography, and part of the
     layout and look-and-feel. **Never infer features, entities, or data model from it.** It shows
     Store, Community, Friends, Downloads, and an install action; none are requirements. On
     _behavior_, the written requirements win; on _appearance_, the reference wins.

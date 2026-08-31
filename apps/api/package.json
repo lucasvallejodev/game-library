@@ -18,6 +18,8 @@
     "@fastify/rate-limit": "catalog:",
     "@fastify/swagger": "catalog:",
     "@fastify/swagger-ui": "catalog:",
+    "better-auth": "catalog:",
+    "drizzle-orm": "catalog:",
     "@game-library/db": "workspace:*",
     "@game-library/shared": "workspace:*",
     "close-with-grace": "catalog:",

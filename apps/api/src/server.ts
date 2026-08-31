@@ -3,6 +3,7 @@ import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod
 
 import type { Env } from './env.js'
 import { healthRoutes } from './modules/health/health.routes.js'
+import authPlugin from './plugins/auth.js'
 import configPlugin from './plugins/config.js'
 import dbPlugin from './plugins/db.js'
 import errorsPlugin from './plugins/errors.js'
@@ -76,10 +77,14 @@ export async function buildServer(env: Env): Promise<FastifyInstance> {
   await app.register(dbPlugin)
   await app.register(redisPlugin)
   await app.register(securityPlugin)
+  await app.register(authPlugin)
   await app.register(swaggerPlugin)
 
   await app.register(healthRoutes)
 
-  await app.ready()
+  // Deliberately NOT calling app.ready() here: readying freezes the route
+  // table, and tests need to register throwaway routes (e.g. to exercise
+  // requireAuth) before the first request. listen() and inject() both ready
+  // the instance themselves, so nothing is lost.
   return app
 }

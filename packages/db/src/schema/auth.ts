@@ -1,4 +1,4 @@
-import { boolean, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
+import { boolean, index, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
 
 /**
  * Better Auth tables.
@@ -56,6 +56,13 @@ export const accounts = pgTable(
     userId: text('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
+    /**
+     * Required by Better Auth 1.7 and part of its unique index. Verified
+     * against @better-auth/core's own table definitions rather than written
+     * from memory — the first hand-written version omitted it and every
+     * sign-up failed at runtime. See docs/adr.md ADR-016.
+     */
+    issuer: text('issuer').notNull(),
     accountId: text('account_id').notNull(),
     providerId: text('provider_id').notNull(),
     password: text('password'),
@@ -68,7 +75,11 @@ export const accounts = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [uniqueIndex('account_provider_uniq').on(t.providerId, t.accountId)],
+  (t) => [
+    // Better Auth declares this on (issuer, accountId).
+    uniqueIndex('account_issuer_account_uniq').on(t.issuer, t.accountId),
+    index('account_user_idx').on(t.userId),
+  ],
 )
 
 export const verifications = pgTable('verification', {
