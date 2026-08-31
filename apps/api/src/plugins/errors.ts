@@ -4,7 +4,6 @@ import {
   hasZodFastifySchemaValidationErrors,
   isResponseSerializationError,
 } from 'fastify-type-provider-zod'
-import type { z } from 'zod'
 
 import { AppError, type ErrorCode } from '../errors.js'
 
@@ -38,10 +37,16 @@ function errorsPlugin(app: FastifyInstance): void {
   app.setErrorHandler((error: FastifyError, request, reply) => {
     // Request failed schema validation.
     if (hasZodFastifySchemaValidationErrors(error)) {
-      const details = error.validation.map((issue) => {
-        const zodIssue = issue.params.issue as z.core.$ZodIssue
-        return { path: zodIssue.path.join('.'), message: zodIssue.message }
-      })
+      // fastify-type-provider-zod builds each entry as
+      //   { keyword, instancePath: '/name', schemaPath, message,
+      //     params: {...omit(issue, ['path','code','message'])} }
+      // so the field path lives in `instancePath` — `params` deliberately
+      // excludes it. Reading `params.issue.path` throws, which turned every
+      // error response into a 500.
+      const details = error.validation.map((issue) => ({
+        path: issue.instancePath.replace(/^\//, '').replaceAll('/', '.'),
+        message: issue.message ?? 'Invalid value',
+      }))
       request.log.info({ details }, 'request validation failed')
       return reply.status(422).send(body('VALIDATION_ERROR', 'Request validation failed', details))
     }

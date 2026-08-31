@@ -21,7 +21,11 @@ export interface AuthSession {
 declare module 'fastify' {
   interface FastifyInstance {
     auth: Auth
-    /** preHandler that rejects anonymous requests with 401. */
+    /**
+     * Rejects anonymous requests with 401. Register it as an **onRequest**
+     * hook: `preHandler` runs after schema validation, which would let an
+     * anonymous caller see 422 validation detail before being turned away.
+     */
     requireAuth: (request: FastifyRequest, reply: FastifyReply) => Promise<void>
   }
 

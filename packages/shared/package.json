@@ -6,12 +6,16 @@
   "description": "Zod schemas, domain types and pure helpers shared by the API and the web app",
   "exports": {
     ".": "./src/index.ts",
-    "./text": "./src/text.ts"
+    "./text": "./src/text.ts",
+    "./schemas": "./src/schemas/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
+  },
+  "dependencies": {
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",
