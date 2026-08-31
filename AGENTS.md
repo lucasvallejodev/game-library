@@ -15,7 +15,7 @@ Two facts shape everything:
 2. Identity across library and wishlist is the **IGDB id** → that is what makes duplicate
    detection reliable rather than fuzzy title matching.
 
-**Status:** roadmap increment 1 complete (workspace skeleton + tooling). Increment 2 (Docker Compose infrastructure) is next.
+**Status:** roadmap increments 1–2 complete (workspace skeleton + tooling; Docker Compose infrastructure). Increment 3 (Drizzle schema + first migration) is next.
 
 ## Documentation map
 
@@ -92,8 +92,9 @@ works.
 ## Commands
 
 ```bash
+cp .env.example .env          # first run only — then fill in the blanks
 pnpm install
-docker compose up -d          # postgres, redis, minio
+docker compose up -d --wait   # postgres, redis, minio (+ one-shot bucket init)
 pnpm db:generate              # schema change → SQL migration (review the output!)
 pnpm db:migrate               # apply
 pnpm db:seed                  # dev dataset
@@ -103,6 +104,18 @@ pnpm test:integration         # Testcontainers — needs Docker
 pnpm test:e2e                 # Playwright
 pnpm lint && pnpm typecheck
 ```
+
+Infrastructure endpoints once `docker compose up -d` is healthy:
+
+| Service       | Address          | Notes                                      |
+| ------------- | ---------------- | ------------------------------------------ |
+| Postgres      | `localhost:5432` | `DATABASE_URL` in `.env`                   |
+| Redis         | `localhost:6379` | password-protected; rejects unauthed pings |
+| MinIO S3 API  | `localhost:9000` | bucket `game-library-media`, **private**   |
+| MinIO console | `localhost:9001` | sign in with `MINIO_ROOT_USER/PASSWORD`    |
+
+All four bind to `127.0.0.1` only. `docker compose down` keeps your data;
+`docker compose down -v` destroys it.
 
 API docs at `http://localhost:4000/api/docs` (generated from the Zod schemas).
 
