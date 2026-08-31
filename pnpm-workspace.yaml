@@ -2,8 +2,24 @@ packages:
   - 'apps/*'
   - 'packages/*'
 
+# Dependency install scripts are blocked by default; each decision is recorded
+# here. Managed by `pnpm approve-builds` — pnpm rewrites this block, so keep
+# rationale in this comment rather than inline.
+#
+#   esbuild      ALLOWED  — postinstall resolves the platform binary that Vite
+#                           (and therefore Vitest) needs to run at all.
+#   cpu-features DENIED   — optional native perf addon for ssh2; ssh2 works
+#                           without it.
+#   ssh2         DENIED   — its script only builds the cpu-features binding.
+#   protobufjs   DENIED   — script is not needed for library use.
+#
+# The last three arrive via testcontainers → dockerode. Verified: the
+# integration suite starts and migrates a real Postgres with all three unbuilt.
 allowBuilds:
+  cpu-features: false
   esbuild: true
+  protobufjs: false
+  ssh2: false
 
 # Single source of truth for dependency versions across every workspace package.
 # Packages reference these with "catalog:" instead of repeating a range.
@@ -26,5 +42,13 @@ catalog:
   globals: 17.11.0
   prettier: 3.9.6
 
+  # --- Database -----------------------------------------------------------
+  drizzle-orm: 0.45.2
+  drizzle-kit: 0.31.10
+  postgres: 3.4.9
+  uuid: 14.0.2
+  dotenv: 17.4.2
+
   # --- Test ---------------------------------------------------------------
   vitest: 4.1.11
+  '@testcontainers/postgresql': 12.1.0

@@ -19,6 +19,10 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "pnpm lint && pnpm typecheck && pnpm test",
+    "db:generate": "pnpm --filter @game-library/db db:generate",
+    "db:migrate": "pnpm --filter @game-library/db db:migrate",
+    "db:studio": "pnpm --filter @game-library/db db:studio",
+    "test:integration": "pnpm -r --if-present test:integration",
     "clean": "pnpm -r --if-present clean && rimraf node_modules"
   },
   "devDependencies": {

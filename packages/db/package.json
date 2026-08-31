@@ -5,13 +5,32 @@
   "type": "module",
   "description": "Drizzle schema, migrations and seed data — the database source of truth",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./schema": "./src/schema/index.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/migrate.ts",
+    "db:check": "drizzle-kit check",
+    "db:studio": "drizzle-kit studio",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --project unit --passWithNoTests",
+    "test:integration": "vitest run --project integration",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@game-library/shared": "workspace:*",
+    "drizzle-orm": "catalog:",
+    "postgres": "catalog:",
+    "uuid": "catalog:"
   },
   "devDependencies": {
+    "@testcontainers/postgresql": "catalog:",
     "@types/node": "catalog:",
-    "typescript": "catalog:"
+    "dotenv": "catalog:",
+    "drizzle-kit": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

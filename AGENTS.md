@@ -15,7 +15,7 @@ Two facts shape everything:
 2. Identity across library and wishlist is the **IGDB id** → that is what makes duplicate
    detection reliable rather than fuzzy title matching.
 
-**Status:** roadmap increments 1–2 complete (workspace skeleton + tooling; Docker Compose infrastructure). Increment 3 (Drizzle schema + first migration) is next.
+**Status:** roadmap increments 1–3 complete (workspace skeleton + tooling; Docker Compose infrastructure; Drizzle schema + first migration). Increment 4 (Fastify skeleton) is next.
 
 ## Documentation map
 
@@ -56,8 +56,10 @@ works.
    → [ADR-005](docs/adr.md)
 5. **Raw color values appear only in `_tokens.scss`.** Everywhere else uses tokens.
 6. **Migrations are committed SQL and immutable once merged.** Fix forward with a new migration.
-   Hand-appending SQL that drizzle-kit cannot express (extensions, partial indexes, CHECKs) is
-   expected. → [database.md](database.md) §6
+   Hand-appending SQL that drizzle-kit cannot express (extensions, partial indexes) is expected;
+   `0000_initial_schema.sql` marks its generated region with
+   `>>> BEGIN/END drizzle-kit generated <<<`. **If you ever regenerate a migration, carry the
+   hand-written blocks outside those markers forward.** → [database.md](database.md) §6
 7. **Every request body, query, and param is Zod-validated at the route boundary.** Shared
    schemas live in `packages/shared` and are used by both API and web.
 8. **Object keys are server-generated.** A client-supplied filename never enters a storage path.
