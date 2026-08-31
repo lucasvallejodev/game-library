@@ -2,6 +2,7 @@ import Fastify, { type FastifyInstance } from 'fastify'
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
 
 import type { Env } from './env.js'
+import { gamesRoutes } from './modules/games/games.routes.js'
 import { healthRoutes } from './modules/health/health.routes.js'
 import { mediaRoutes } from './modules/media/media.routes.js'
 import { taxonomyRoutes } from './modules/taxonomy/taxonomy.routes.js'
@@ -86,6 +87,7 @@ export async function buildServer(env: Env): Promise<FastifyInstance> {
 
   await app.register(healthRoutes)
   await app.register(taxonomyRoutes)
+  await app.register(gamesRoutes)
   await app.register(mediaRoutes)
 
   // Deliberately NOT calling app.ready() here: readying freezes the route

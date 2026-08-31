@@ -15,7 +15,7 @@ Two facts shape everything:
 2. Identity across library and wishlist is the **IGDB id** → that is what makes duplicate
    detection reliable rather than fuzzy title matching.
 
-**Status:** roadmap increments 1–7 complete (tooling; Docker infra; schema + migrations; Fastify skeleton; Better Auth + seeding; taxonomy CRUD; storage + local fallback). Increment 8 (games CRUD + filtering) is next.
+**Status:** roadmap increments 1–8 complete (tooling; Docker infra; schema + migrations; Fastify skeleton; Better Auth + seeding; taxonomy CRUD; storage + fallback; games CRUD + filtering). Increment 9 (IGDB integration) is next — Twitch credentials are already present in `.env`.
 
 ## Documentation map
 
