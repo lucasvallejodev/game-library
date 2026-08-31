@@ -15,7 +15,7 @@ Two facts shape everything:
 2. Identity across library and wishlist is the **IGDB id** → that is what makes duplicate
    detection reliable rather than fuzzy title matching.
 
-**Status:** roadmap increments 1–8 complete (tooling; Docker infra; schema + migrations; Fastify skeleton; Better Auth + seeding; taxonomy CRUD; storage + fallback; games CRUD + filtering). Increment 9 (IGDB integration) is next — Twitch credentials are already present in `.env`.
+**Status:** roadmap increments 1–9 complete — the whole backend. Tooling; Docker infra; schema + migrations; Fastify skeleton; Better Auth + seeding; taxonomy CRUD; storage + S3/local fallback; games CRUD + filtering; IGDB integration (verified against the live API). Increment 10 (Next.js web shell) is next — the first frontend work.
 
 ## Documentation map
 
@@ -111,6 +111,8 @@ pnpm db:migrate               # apply
 pnpm db:seed                  # dev dataset
 pnpm dev                      # api :4000 + web :3000
 pnpm test:integration         # Testcontainers — needs Docker running
+                              # IGDB tests run live when TWITCH_* are set,
+                              # and skip (not fail) when they are not
 pnpm test                     # unit
 pnpm test:integration         # Testcontainers — needs Docker
 pnpm test:e2e                 # Playwright

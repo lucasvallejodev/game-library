@@ -99,8 +99,8 @@ export const gameListSchema = z.object({
 
 const isoDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'must be a date as YYYY-MM-DD')
 
-export const createGameSchema = z.object({
-  name: displayNameSchema,
+const gameFieldsSchema = z.object({
+  name: displayNameSchema.optional(),
   igdbId: z.number().int().positive().optional(),
   gameTypeId: z.uuid().optional(),
   /** Replaces the full set. A game may sit in several locations at once. */
@@ -113,11 +113,19 @@ export const createGameSchema = z.object({
 })
 
 /**
+ * A name is required *unless* an igdbId is given, in which case the server
+ * fills the name in from IGDB. See docs/api-endpoints.md.
+ */
+export const createGameSchema = gameFieldsSchema.refine(
+  (v) => v.name !== undefined || v.igdbId !== undefined,
+  { message: 'provide a name, or an igdbId to import one from IGDB' },
+)
+
+/**
  * Every field optional, but at least one required — an empty PATCH should be a
  * 422 rather than a silent no-op. `null` clears a nullable field.
  */
-export const updateGameSchema = createGameSchema
-  .partial()
+export const updateGameSchema = gameFieldsSchema
   .extend({
     gameTypeId: z.uuid().nullable().optional(),
     summary: z.string().max(5000).nullable().optional(),

@@ -3,7 +3,8 @@ import type { Readable } from 'node:stream'
 import { newId } from '@game-library/db'
 import type { FastifyBaseLogger } from 'fastify'
 
-import { NotFoundError } from '../../errors.js'
+import { ExternalServiceError, NotFoundError, ValidationError } from '../../errors.js'
+import { IGDB_IMAGE_HOST } from '../../igdb/igdb.mapper.js'
 import { processImage } from '../../storage/image-pipeline.js'
 import type { StorageService } from '../../storage/storage.service.js'
 import { ObjectNotFoundError, type StorageDriverName } from '../../storage/types.js'
@@ -31,6 +32,8 @@ export interface MediaService {
     input: Buffer,
     meta: { source: 'igdb' | 'upload'; sourceUrl?: string },
   ) => Promise<StoredAsset>
+  /** Mirror a cover from IGDB. Only the IGDB image host may be fetched. */
+  storeFromUrl: (userId: string, url: string) => Promise<StoredAsset>
   read: (userId: string, assetId: string, variant: MediaVariant) => Promise<MediaStream>
   remove: (userId: string, assetId: string) => Promise<void>
 }
@@ -55,7 +58,7 @@ export interface MediaServiceDeps {
 export function createMediaService(deps: MediaServiceDeps): MediaService {
   const { repo, storage, maxUploadBytes, log } = deps
 
-  return {
+  const service: MediaService = {
     storeImage: async (userId, input, meta) => {
       const processed = await processImage(input, { maxBytes: maxUploadBytes })
       const id = newId()
@@ -99,6 +102,40 @@ export function createMediaService(deps: MediaServiceDeps): MediaService {
       }
     },
 
+    storeFromUrl: async (userId, url) => {
+      /**
+       * SSRF guard. Mirroring means the server fetches a URL, so without a
+       * strict host allowlist "fetch this cover" becomes a probe against the
+       * internal network — cloud metadata endpoints, Redis, Postgres.
+       * Only IGDB's image CDN is reachable. See docs/security.md §5.
+       */
+      let parsed: URL
+      try {
+        parsed = new URL(url)
+      } catch {
+        throw new ValidationError('Cover URL is not a valid URL')
+      }
+
+      if (parsed.protocol !== 'https:' || parsed.hostname !== IGDB_IMAGE_HOST) {
+        throw new ValidationError(`Cover images may only be fetched from ${IGDB_IMAGE_HOST}`)
+      }
+
+      const response = await fetch(parsed, {
+        // Never follow a redirect: it is the standard way to escape an
+        // allowlist that only checks the initial hostname.
+        redirect: 'error',
+        signal: AbortSignal.timeout(15_000),
+      })
+
+      if (!response.ok) {
+        throw new ExternalServiceError('IGDB', `Cover fetch failed with ${String(response.status)}`)
+      }
+
+      const bytes = Buffer.from(await response.arrayBuffer())
+      // The same pipeline as an upload: magic bytes, re-encode, EXIF strip.
+      return service.storeImage(userId, bytes, { source: 'igdb', sourceUrl: url })
+    },
+
     read: async (userId, assetId, variant) => {
       const asset = await repo.findById(userId, assetId)
       // Another user's asset is indistinguishable from a missing one.
@@ -129,4 +166,6 @@ export function createMediaService(deps: MediaServiceDeps): MediaService {
       ])
     },
   }
+
+  return service
 }

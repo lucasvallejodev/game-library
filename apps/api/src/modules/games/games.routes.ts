@@ -13,16 +13,23 @@ import { currentUserId } from '../../auth/current-user.js'
 import { ValidationError } from '../../errors.js'
 import { createMediaRepository } from '../media/media.repository.js'
 import { createMediaService } from '../media/media.service.js'
+import { createIgdbService } from '../igdb/igdb.service.js'
 import { createGamesRepository } from './games.repository.js'
 import { createGamesService } from './games.service.js'
 
 export const gamesRoutes: FastifyPluginAsyncZod = async (app) => {
-  const service = createGamesService(createGamesRepository(app.db))
   const media = createMediaService({
     repo: createMediaRepository(app.db),
     storage: app.storage,
     maxUploadBytes: app.config.MAX_UPLOAD_BYTES,
     log: app.log,
+  })
+  const service = createGamesService({
+    repo: createGamesRepository(app.db),
+    db: app.db,
+    log: app.log,
+    igdb: app.igdb ? createIgdbService(app.db, app.igdb) : null,
+    media,
   })
 
   app.addHook('onRequest', app.requireAuth)
@@ -101,6 +108,19 @@ export const gamesRoutes: FastifyPluginAsyncZod = async (app) => {
       await service.remove(currentUserId(request), request.params.id)
       return reply.status(204).send(null)
     },
+  )
+
+  app.post(
+    '/api/games/:id/refresh-igdb',
+    {
+      schema: {
+        tags: ['games'],
+        summary: 'Re-pull IGDB metadata; never overwrites notes, locations or type',
+        params: idParamSchema,
+        response: { 200: gameDetailSchema },
+      },
+    },
+    async (request) => service.refreshFromIgdb(currentUserId(request), request.params.id),
   )
 
   app.post(

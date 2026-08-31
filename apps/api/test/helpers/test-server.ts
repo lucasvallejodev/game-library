@@ -43,6 +43,8 @@ export interface TestServerOptions {
   migrate?: boolean
   /** Point storage at a test MinIO, or force the local driver. */
   storage?: StorageOverrides
+  /** Real Twitch credentials, to exercise IGDB against the live API. */
+  igdb?: { TWITCH_CLIENT_ID: string; TWITCH_CLIENT_SECRET: string }
 }
 
 export async function startTestServer(options: TestServerOptions = {}): Promise<TestServer> {
@@ -70,6 +72,7 @@ export async function startTestServer(options: TestServerOptions = {}): Promise<
     STORAGE_DRIVER: 'local',
     STORAGE_LOCAL_PATH: await mkdtemp(join(tmpdir(), 'game-library-storage-')),
     ...options.storage,
+    ...options.igdb,
   })
 
   const app = await buildServer(env)

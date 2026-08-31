@@ -7,8 +7,14 @@ import type {
   UpdateGameInput,
 } from '@game-library/shared/schemas'
 
+import type { Database } from '@game-library/db'
+import type { FastifyBaseLogger } from 'fastify'
+
 import { ConflictError, NotFoundError, ValidationError } from '../../errors.js'
+import type { MediaService } from '../media/media.service.js'
+import type { IgdbService } from '../igdb/igdb.service.js'
 import type { GameLinks, GameRow, GamesRepository } from './games.repository.js'
+import { resolveGenreIds } from './igdb-import.js'
 
 export interface GamesService {
   list: (userId: string, query: GameListQuery) => Promise<GameList>
@@ -17,6 +23,17 @@ export interface GamesService {
   update: (userId: string, id: string, input: UpdateGameInput) => Promise<GameDetail>
   remove: (userId: string, id: string) => Promise<void>
   setCover: (userId: string, id: string, assetId: string) => Promise<GameDetail>
+  /** Re-pull IGDB metadata, leaving user-authored fields alone. */
+  refreshFromIgdb: (userId: string, id: string) => Promise<GameDetail>
+}
+
+export interface GamesServiceDeps {
+  repo: GamesRepository
+  db: Database
+  log: FastifyBaseLogger
+  /** Null when Twitch credentials are not configured. */
+  igdb: IgdbService | null
+  media: MediaService
 }
 
 function coverUrls(assetId: string | null): { coverUrl: string | null; thumbUrl: string | null } {
@@ -60,7 +77,26 @@ function toDetail(row: GameRow, links: GameLinks): GameDetail {
   }
 }
 
-export function createGamesService(repo: GamesRepository): GamesService {
+export function createGamesService(deps: GamesServiceDeps): GamesService {
+  const { repo, db, log, igdb, media } = deps
+
+  /**
+   * Mirror an IGDB cover into our own storage.
+   *
+   * Never fatal: a game without a cover is fine, a failed save is not. If IGDB
+   * or object storage misbehaves the game is still created and the cover can
+   * be added later. See docs/adr.md ADR-008.
+   */
+  async function mirrorCover(userId: string, gameId: string, coverUrl: string | null) {
+    if (!coverUrl) return
+    try {
+      const asset = await media.storeFromUrl(userId, coverUrl)
+      await repo.setCover(userId, gameId, asset.id)
+    } catch (error) {
+      log.warn({ err: error, gameId, coverUrl }, 'failed to mirror IGDB cover')
+    }
+  }
+
   /**
    * Referenced taxonomy ids must belong to the acting user.
    *
@@ -139,18 +175,40 @@ export function createGamesService(repo: GamesRepository): GamesService {
         assertOwned(userId, 'genres', input.genreIds ?? [], 'genres'),
       ])
 
+      /**
+       * When an igdbId is given, IGDB fills in whatever the caller did not.
+       * Explicit input always wins: the user typing a name means they want
+       * that name, not IGDB's.
+       */
+      const metadata =
+        input.igdbId !== undefined && igdb ? await igdb.fetchForImport(input.igdbId) : null
+
       const id = await repo.insert(userId, {
-        name: input.name,
+        name: input.name ?? metadata?.name ?? 'Untitled',
         igdbId: input.igdbId ?? null,
         gameTypeId: input.gameTypeId ?? null,
-        summary: input.summary ?? null,
-        releaseDate: input.releaseDate ?? null,
+        summary: input.summary ?? metadata?.summary ?? null,
+        releaseDate: input.releaseDate ?? metadata?.releaseDate ?? null,
+        igdbRating:
+          metadata?.rating === undefined || metadata.rating === null
+            ? null
+            : String(metadata.rating),
         notes: input.notes ?? null,
         acquiredAt: input.acquiredAt ?? null,
       })
 
       if (input.locationIds) await repo.replaceLocations(userId, id, input.locationIds)
-      if (input.genreIds) await repo.replaceGenres(userId, id, input.genreIds)
+
+      if (input.genreIds) {
+        await repo.replaceGenres(userId, id, input.genreIds)
+      } else if (metadata && metadata.genres.length > 0) {
+        // IGDB genre names are mapped onto this user's own genre rows.
+        const genreIds = await resolveGenreIds(db, userId, metadata.genres)
+        await repo.replaceGenres(userId, id, genreIds)
+      }
+
+      // Mirrored after the row exists, so a slow CDN never delays the insert.
+      await mirrorCover(userId, id, metadata?.coverUrl ?? null)
 
       return loadDetail(userId, id)
     },
@@ -197,6 +255,43 @@ export function createGamesService(repo: GamesRepository): GamesService {
     setCover: async (userId, id, assetId) => {
       const updated = await repo.setCover(userId, id, assetId)
       if (!updated) throw new NotFoundError('Game')
+      return loadDetail(userId, id)
+    },
+
+    refreshFromIgdb: async (userId, id) => {
+      const existing = await repo.findById(userId, id)
+      if (!existing) throw new NotFoundError('Game')
+
+      if (existing.igdbId === null) {
+        throw new ValidationError('This game has no IGDB id to refresh from')
+      }
+      if (!igdb) {
+        throw new ValidationError('IGDB is not configured on this server')
+      }
+
+      const metadata = await igdb.fetchForImport(existing.igdbId)
+
+      /**
+       * Only IGDB-owned fields are overwritten. `notes`, `locations`,
+       * `gameTypeId` and `acquiredAt` are the user's — refreshing metadata
+       * must never silently discard what they wrote.
+       * See docs/api-endpoints.md.
+       */
+      await repo.update(userId, id, {
+        name: metadata.name,
+        summary: metadata.summary,
+        releaseDate: metadata.releaseDate,
+        igdbRating: metadata.rating === null ? null : String(metadata.rating),
+      })
+
+      if (metadata.genres.length > 0) {
+        await repo.replaceGenres(userId, id, await resolveGenreIds(db, userId, metadata.genres))
+      }
+
+      if (existing.coverAssetId === null) {
+        await mirrorCover(userId, id, metadata.coverUrl)
+      }
+
       return loadDetail(userId, id)
     },
   }

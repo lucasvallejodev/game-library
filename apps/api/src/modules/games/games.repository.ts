@@ -74,6 +74,8 @@ export interface GamesRepository {
 export interface InsertGame {
   name: string
   igdbId?: number | null
+  /** numeric(4,1) is a string at the driver level, both ways. */
+  igdbRating?: string | null
   gameTypeId?: string | null
   summary?: string | null
   releaseDate?: string | null
