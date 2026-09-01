@@ -8,6 +8,17 @@ const here = dirname(fileURLToPath(import.meta.url))
 const config: NextConfig = {
   reactStrictMode: true,
 
+  /**
+   * Traces exactly the files the server needs into .next/standalone, so the
+   * production image installs no node_modules at all.
+   *
+   * outputFileTracingRoot must point at the monorepo root: tracing defaults to
+   * the Next project directory, which would miss the workspace packages this
+   * app imports.
+   */
+  output: 'standalone',
+  outputFileTracingRoot: resolve(here, '../..'),
+
   // Workspace packages ship TypeScript source rather than build output, so
   // Next has to compile them alongside the app.
   transpilePackages: ['@game-library/shared'],

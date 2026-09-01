@@ -15,12 +15,14 @@ const MIGRATIONS_FOLDER = resolve(dirname(fileURLToPath(import.meta.url)), '../m
  * starts, so two replicas can never race to migrate the same database.
  * See docs/architecture.md §9.
  */
-export async function runMigrations(databaseUrl: string): Promise<void> {
+export async function runMigrations(databaseUrl: string, migrationsFolder?: string): Promise<void> {
   // max: 1 — a migration must run on a single connection, in order.
   const { db, close } = createDatabase({ url: databaseUrl, max: 1 })
 
   try {
-    await migrate(db, { migrationsFolder: MIGRATIONS_FOLDER })
+    // The folder is overridable because the default is resolved relative to
+    // this file, which does not survive bundling for the production image.
+    await migrate(db, { migrationsFolder: migrationsFolder ?? MIGRATIONS_FOLDER })
   } finally {
     await close()
   }

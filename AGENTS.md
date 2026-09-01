@@ -15,7 +15,7 @@ Two facts shape everything:
 2. Identity across library and wishlist is the **IGDB id** → that is what makes duplicate
    detection reliable rather than fuzzy title matching.
 
-**Status:** roadmap increments 1–9 complete — the whole backend. Tooling; Docker infra; schema + migrations; Fastify skeleton; Better Auth + seeding; taxonomy CRUD; storage + S3/local fallback; games CRUD + filtering; IGDB integration (verified against the live API). Increment 12 (wishlist, duplicate-purchase guard, promote flow, markdown notes) is complete. Increment 13 (production Docker packaging) is next; then 14 (E2E + CI).
+**Status:** roadmap increments 1–9 complete — the whole backend. Tooling; Docker infra; schema + migrations; Fastify skeleton; Better Auth + seeding; taxonomy CRUD; storage + S3/local fallback; games CRUD + filtering; IGDB integration (verified against the live API). Increment 13 (production Docker packaging) is complete. Increment 14 (Playwright E2E + CI) is the last one.
 
 ## Documentation map
 
@@ -80,7 +80,11 @@ works.
 15. **Account seeding must stay idempotent.** It is not transactional (Better Auth's Drizzle
     adapter has none), so re-runnability is the recovery mechanism. Never make
     `seedUserDefaults` throw on conflict. → [ADR-016](docs/adr.md)
-16. **The reference image is a styling reference only** — colors, typography, and part of the
+16. **Keep the API image free of frontend packages.** `better-auth` declares `next`, `react` and
+    `drizzle-kit` as _optional_ peers, and pnpm satisfies them from `apps/web`, adding ~350MB the
+    API never imports. `apps/api/Dockerfile` prunes them explicitly — if you add a dependency,
+    re-check the image size.
+17. **The reference image is a styling reference only** — colors, typography, and part of the
     layout and look-and-feel. **Never infer features, entities, or data model from it.** It shows
     Store, Community, Friends, Downloads, and an install action; none are requirements. On
     _behavior_, the written requirements win; on _appearance_, the reference wins.
@@ -139,6 +143,12 @@ Infrastructure endpoints once `docker compose up -d` is healthy:
 
 All four bind to `127.0.0.1` only. `docker compose down` keeps your data;
 `docker compose down -v` destroys it.
+
+Production stack (builds images, hides the database from the host):
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+```
 
 API docs at `http://localhost:4000/api/docs` (generated from the Zod schemas).
 

@@ -1,0 +1,30 @@
+# Everything the image builds itself, or must never enter it.
+node_modules
+**/node_modules
+.next
+**/.next
+dist
+**/dist
+coverage
+**/coverage
+
+# Secrets. The image gets its configuration from the environment.
+.env
+.env.*
+!.env.example
+
+# Local state and tooling
+.git
+.github
+docs
+*.log
+
+# The runtime upload volume, anchored with a leading slash.
+# NOT `**/storage`: that also matches apps/api/src/storage, the driver source,
+# which silently broke the API bundle.
+/storage
+/apps/api/storage
+.vscode
+.idea
+test-results
+playwright-report

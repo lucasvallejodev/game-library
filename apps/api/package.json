@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --project unit --passWithNoTests",
     "test:integration": "vitest run --project integration",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "build": "node build.mjs",
+    "migrate": "tsx src/migrate.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "catalog:",
@@ -20,18 +22,20 @@
     "@fastify/rate-limit": "catalog:",
     "@fastify/swagger": "catalog:",
     "@fastify/swagger-ui": "catalog:",
-    "better-auth": "catalog:",
-    "drizzle-orm": "catalog:",
-    "file-type": "catalog:",
-    "sharp": "catalog:",
     "@game-library/db": "workspace:*",
     "@game-library/shared": "workspace:*",
+    "better-auth": "catalog:",
     "close-with-grace": "catalog:",
     "dotenv": "catalog:",
+    "drizzle-orm": "catalog:",
     "fastify": "catalog:",
     "fastify-plugin": "catalog:",
     "fastify-type-provider-zod": "catalog:",
+    "file-type": "catalog:",
     "ioredis": "catalog:",
+    "postgres": "catalog:",
+    "sharp": "catalog:",
+    "uuid": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
@@ -43,6 +47,7 @@
     "testcontainers": "catalog:",
     "tsx": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "esbuild": "catalog:"
   }
 }

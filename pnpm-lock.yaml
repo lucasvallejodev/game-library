@@ -78,6 +78,9 @@ catalogs:
     drizzle-orm:
       specifier: 0.45.2
       version: 0.45.2
+    esbuild:
+      specifier: 0.28.2
+      version: 0.28.2
     eslint:
       specifier: 10.9.1
       version: 10.9.1
@@ -236,9 +239,15 @@ importers:
       ioredis:
         specifier: 'catalog:'
         version: 6.0.0
+      postgres:
+        specifier: 'catalog:'
+        version: 3.4.9
       sharp:
         specifier: 'catalog:'
         version: 0.35.4(@types/node@26.4.0)
+      uuid:
+        specifier: 'catalog:'
+        version: 14.0.2
       zod:
         specifier: 'catalog:'
         version: 4.5.4
@@ -252,6 +261,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 26.4.0
+      esbuild:
+        specifier: 'catalog:'
+        version: 0.28.2
       pino:
         specifier: 'catalog:'
         version: 10.3.1

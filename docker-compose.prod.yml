@@ -1,0 +1,149 @@
+# Production overlay. Applied on top of docker-compose.yml:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# What it changes:
+#   - builds and runs the api and web images
+#   - runs migrations as a one-shot container that must exit 0 before the API
+#     starts, so two replicas can never race to migrate the same database
+#   - stops publishing Postgres, Redis and MinIO ports to the host; they are
+#     reachable only on the internal network (docs/security.md §8)
+#   - restart policies on everything that should come back after a reboot
+
+services:
+  # ── Infrastructure: keep the data, drop the exposure ───────────────────────
+  # `!reset` is required, not cosmetic: Compose *appends* sequences when
+  # merging files, so `ports: []` would leave the base file's host mappings
+  # intact and silently keep the database exposed. Verified with
+  # `docker compose config`.
+  postgres:
+    restart: always
+    ports: !reset []
+
+  redis:
+    restart: always
+    ports: !reset []
+
+  minio:
+    restart: always
+    ports: !reset []
+
+  # ── Schema ────────────────────────────────────────────────────────────────
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    image: game-library-api:latest
+    container_name: gamelib-migrate
+    command: ['node', 'dist/migrate.js']
+    restart: 'no'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      # Service names, not localhost: these resolve on the compose network.
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:3000}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:4000}
+
+  # ── Application ───────────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    image: game-library-api:latest
+    container_name: gamelib-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      # The gate: the API never starts against an unmigrated database.
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - '127.0.0.1:${API_PORT:-4000}:4000'
+    volumes:
+      # The S3→local fallback needs somewhere durable to land, or objects
+      # written during an outage die with the container (ADR-008).
+      - api-storage:/app/storage
+    environment:
+      NODE_ENV: production
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      API_HOST: 0.0.0.0
+      API_PORT: 4000
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:3000}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:4000}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      TWITCH_CLIENT_ID: ${TWITCH_CLIENT_ID:-}
+      TWITCH_CLIENT_SECRET: ${TWITCH_CLIENT_SECRET:-}
+      STORAGE_DRIVER: ${STORAGE_DRIVER:-s3}
+      STORAGE_LOCAL_PATH: /app/storage
+      MAX_UPLOAD_BYTES: ${MAX_UPLOAD_BYTES:-8388608}
+      S3_ENDPOINT: http://minio:9000
+      S3_REGION: ${S3_REGION:-us-east-1}
+      S3_BUCKET: ${S3_BUCKET}
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      S3_FORCE_PATH_STYLE: 'true'
+    healthcheck:
+      # Readiness, not liveness: this reports the database, Redis and storage.
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:4000/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        # Inlined into the browser bundle at build time, so it must be the URL
+        # a browser can reach — not the compose service name.
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+    image: game-library-web:latest
+    container_name: gamelib-web
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - '127.0.0.1:${WEB_PORT:-3000}:3000'
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/sign-in').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+
+volumes:
+  api-storage:
