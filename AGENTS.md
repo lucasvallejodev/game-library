@@ -15,7 +15,7 @@ Two facts shape everything:
 2. Identity across library and wishlist is the **IGDB id** → that is what makes duplicate
    detection reliable rather than fuzzy title matching.
 
-**Status:** roadmap increments 1–9 complete — the whole backend. Tooling; Docker infra; schema + migrations; Fastify skeleton; Better Auth + seeding; taxonomy CRUD; storage + S3/local fallback; games CRUD + filtering; IGDB integration (verified against the live API). Increment 11 (Library view: cover grid, filter bar, IGDB add dialog) is complete — **the app is usable end to end**. Increment 12 (wishlist, duplicate guard UI, markdown notes) is next.
+**Status:** roadmap increments 1–9 complete — the whole backend. Tooling; Docker infra; schema + migrations; Fastify skeleton; Better Auth + seeding; taxonomy CRUD; storage + S3/local fallback; games CRUD + filtering; IGDB integration (verified against the live API). Increment 12 (wishlist, duplicate-purchase guard, promote flow, markdown notes) is complete. Increment 13 (production Docker packaging) is next; then 14 (E2E + CI).
 
 ## Documentation map
 
@@ -94,6 +94,10 @@ works.
 
 **Imports** — `@/` path aliases within an app; workspace packages by name
 (`@game-library/shared`). SCSS partials via `@use`, never `@import`.
+
+**Next.js 16** — `next dev` writes `apps/web/AGENTS.md` + `CLAUDE.md` pointing at the bundled docs
+in `node_modules/next/dist/docs/`. Read those before writing web code: request APIs (`headers()`,
+`params`, `searchParams`) are async-only, and `middleware` is renamed `proxy`.
 
 **SCSS resolution (web)** — component modules use `@use 'styles/tokens'` (bare, resolved by
 `sassOptions.loadPaths`), and files _inside_ `src/styles/` use `@use './tokens'`. Do **not** use

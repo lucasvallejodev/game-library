@@ -8,13 +8,18 @@ import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button/Button'
 import { useCreateGame, useIgdbSearch } from '@/features/library/queries'
+import { useAddToWishlist } from '@/features/wishlist/queries'
 import { ApiError } from '@/lib/api-client'
 
 import styles from './AddGameDialog.module.scss'
 
+export type AddMode = 'library' | 'wishlist'
+
 export interface AddGameDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  /** Which list the chosen title is added to. Defaults to the library. */
+  mode?: AddMode
 }
 
 function useDebounced(value: string, delay = 350): string {
@@ -40,13 +45,17 @@ function useDebounced(value: string, delay = 350): string {
  * exists. Owned titles are shown and disabled rather than hidden: knowing you
  * have it is the answer you came for.
  */
-export function AddGameDialog({ open, onOpenChange }: AddGameDialogProps) {
+export function AddGameDialog({ open, onOpenChange, mode = 'library' }: AddGameDialogProps) {
   const [term, setTerm] = useState('')
   const [error, setError] = useState<string | null>(null)
   const debounced = useDebounced(term)
 
+  const wishlisting = mode === 'wishlist'
+
   const search = useIgdbSearch(debounced)
   const createGame = useCreateGame()
+  const addToWishlist = useAddToWishlist()
+  const create = wishlisting ? addToWishlist : createGame
 
   // Start clean each time the dialog opens.
   useEffect(() => {
@@ -59,9 +68,11 @@ export function AddGameDialog({ open, onOpenChange }: AddGameDialogProps) {
   async function add(game: IgdbGame) {
     setError(null)
     try {
-      await createGame.mutateAsync({ igdbId: game.igdbId, name: game.name })
+      await create.mutateAsync({ igdbId: game.igdbId, name: game.name })
       onOpenChange(false)
     } catch (err) {
+      // A 409 here is the duplicate guard doing its job, and its message
+      // already names what you own — show it rather than a generic failure.
       setError(
         err instanceof ApiError
           ? err.message
@@ -76,7 +87,7 @@ export function AddGameDialog({ open, onOpenChange }: AddGameDialogProps) {
 
     setError(null)
     try {
-      await createGame.mutateAsync({ name })
+      await create.mutateAsync({ name })
       onOpenChange(false)
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not add that game.')
@@ -93,9 +104,13 @@ export function AddGameDialog({ open, onOpenChange }: AddGameDialogProps) {
         <Dialog.Content className={styles.dialog__panel}>
           <div className={styles.dialog__header}>
             <div>
-              <Dialog.Title className={styles.dialog__title}>Add a game</Dialog.Title>
+              <Dialog.Title className={styles.dialog__title}>
+                {wishlisting ? 'Add to wishlist' : 'Add a game'}
+              </Dialog.Title>
               <Dialog.Description className={styles.dialog__description}>
-                Search IGDB for cover art and metadata, or add a title by hand.
+                {wishlisting
+                  ? 'Search IGDB for something you want. Anything already in your library is flagged.'
+                  : 'Search IGDB for cover art and metadata, or add a title by hand.'}
               </Dialog.Description>
             </div>
             <Dialog.Close className={styles.dialog__close} aria-label="Close">
@@ -139,7 +154,7 @@ export function AddGameDialog({ open, onOpenChange }: AddGameDialogProps) {
                   key={game.igdbId}
                   type="button"
                   className={styles.result}
-                  disabled={game.inLibrary || createGame.isPending}
+                  disabled={game.inLibrary || (wishlisting && game.inWishlist) || create.isPending}
                   onClick={() => {
                     void add(game)
                   }}
@@ -179,11 +194,11 @@ export function AddGameDialog({ open, onOpenChange }: AddGameDialogProps) {
 
           <div className={styles.dialog__footer}>
             <span className={styles.dialog__hint}>
-              {createGame.isPending ? 'Adding…' : 'Covers are copied into your own storage.'}
+              {create.isPending ? 'Adding…' : 'Covers are copied into your own storage.'}
             </span>
             <Button
               variant="secondary"
-              disabled={term.trim().length === 0 || createGame.isPending}
+              disabled={term.trim().length === 0 || create.isPending}
               onClick={() => {
                 void addManually()
               }}

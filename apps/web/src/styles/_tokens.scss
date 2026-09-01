@@ -6,6 +6,8 @@
 // colour, typography and layout feel only — never features. See ADR-013.
 // =============================================================================
 
+@use "sass:math";
+
 // ── Surfaces ─────────────────────────────────────────────────────────────────
 // The reference layers three greys: a near-black page behind a dark shell, with
 // the sidebar a shade darker than the content pane. That separation is what
@@ -83,7 +85,10 @@ $shadow-popover: 0 8px 28px rgb(0 0 0 / 50%);
 $sidebar-width: 232px;
 $sidebar-rail-width: 64px;
 $topbar-height: 60px;
-$cover-aspect: 3 / 4; // portrait, as in the reference
+// 0.75, not `3 / 4`: slash division is deprecated in Dart Sass and removed in
+// 2.0. `aspect-ratio` accepts a bare number, so this is the same ratio without
+// the warning in every stylesheet that imports these tokens.
+$cover-aspect: math.div(3, 4); // portrait, as in the reference
 $card-min-width: 190px;
 $content-max-width: 1600px;
 

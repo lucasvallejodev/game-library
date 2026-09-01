@@ -1,0 +1,105 @@
+@use "styles/tokens" as *;
+@use "styles/mixins" as *;
+
+.markdown {
+  font-size: $fs-base;
+  color: $color-text-secondary;
+  line-height: $lh-normal;
+
+  > * + * {
+    margin-top: $space-3;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: $color-text-primary;
+    line-height: $lh-tight;
+  }
+
+  h1 {
+    font-size: $fs-lg;
+  }
+  h2 {
+    font-size: $fs-md;
+  }
+  h3,
+  h4 {
+    font-size: $fs-base;
+  }
+
+  strong {
+    color: $color-text-primary;
+  }
+
+  a {
+    color: $color-accent;
+    text-decoration: underline;
+
+    &:hover {
+      color: $color-accent-hover;
+    }
+  }
+
+  ul,
+  ol {
+    padding-left: $space-5;
+    list-style: revert;
+  }
+
+  li + li {
+    margin-top: $space-1;
+  }
+
+  code {
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-family: ui-monospace, "SFMono-Regular", "Cascadia Code", monospace;
+    font-size: 0.9em;
+    color: $color-text-primary;
+    background-color: $color-bg-elevated;
+  }
+
+  pre {
+    padding: $space-3;
+    border-radius: $radius-sm;
+    background-color: $color-bg-elevated;
+    overflow-x: auto;
+
+    @include custom-scrollbar;
+
+    code {
+      padding: 0;
+      background: none;
+    }
+  }
+
+  blockquote {
+    padding-left: $space-3;
+    border-left: 2px solid $color-border-strong;
+    color: $color-text-muted;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid $color-border;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: $fs-sm;
+  }
+
+  th,
+  td {
+    padding: $space-2;
+    border: 1px solid $color-border;
+    text-align: left;
+  }
+
+  th {
+    color: $color-text-primary;
+  }
+}
