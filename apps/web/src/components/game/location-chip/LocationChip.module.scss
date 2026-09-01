@@ -1,0 +1,26 @@
+@use "styles/tokens" as *;
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-1;
+  max-width: 100%;
+  font-size: $fs-xs;
+  color: $color-text-secondary;
+
+  &__dot {
+    width: 7px;
+    height: 7px;
+    flex-shrink: 0;
+    border-radius: $radius-full;
+    // Runtime value from the database, so it can only arrive as a custom
+    // property — an SCSS variable is compile-time. See styles/_theme.scss.
+    background-color: var(--chip-color, #{$color-text-muted});
+  }
+
+  &__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

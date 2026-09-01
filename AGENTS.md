@@ -15,7 +15,7 @@ Two facts shape everything:
 2. Identity across library and wishlist is the **IGDB id** → that is what makes duplicate
    detection reliable rather than fuzzy title matching.
 
-**Status:** roadmap increments 1–9 complete — the whole backend. Tooling; Docker infra; schema + migrations; Fastify skeleton; Better Auth + seeding; taxonomy CRUD; storage + S3/local fallback; games CRUD + filtering; IGDB integration (verified against the live API). Increment 10 (Next.js web shell, SCSS layer, auth pages) is complete. Increment 11 (Library view: game grid, filter bar, add dialog) is next.
+**Status:** roadmap increments 1–9 complete — the whole backend. Tooling; Docker infra; schema + migrations; Fastify skeleton; Better Auth + seeding; taxonomy CRUD; storage + S3/local fallback; games CRUD + filtering; IGDB integration (verified against the live API). Increment 11 (Library view: cover grid, filter bar, IGDB add dialog) is complete — **the app is usable end to end**. Increment 12 (wishlist, duplicate guard UI, markdown notes) is next.
 
 ## Documentation map
 

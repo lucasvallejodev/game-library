@@ -1,0 +1,99 @@
+@use "styles/tokens" as *;
+@use "styles/mixins" as *;
+
+.grid {
+  @include card-grid;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-2;
+  border-radius: $radius-sm;
+  transition: background-color $transition-fast;
+
+  &:hover {
+    background-color: $color-bg-elevated;
+  }
+
+  &__cover {
+    width: 36px;
+    aspect-ratio: $cover-aspect;
+    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: 3px;
+    background-color: $color-bg-elevated;
+  }
+
+  &__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &__name {
+    @include truncate;
+
+    flex: 1;
+    min-width: 0;
+    font-size: $fs-base;
+    color: $color-text-primary;
+  }
+
+  &__type,
+  &__year {
+    font-size: $fs-xs;
+    color: $color-text-muted;
+    flex-shrink: 0;
+  }
+
+  &__locations {
+    display: flex;
+    gap: $space-2;
+    flex-shrink: 0;
+  }
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-3;
+  margin-top: $space-6;
+  font-size: $fs-sm;
+  color: $color-text-secondary;
+
+  &__page {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.skeleton {
+  aspect-ratio: $cover-aspect;
+  border-radius: $radius-sm;
+  background: linear-gradient(
+    90deg,
+    $color-bg-elevated 25%,
+    $color-bg-hover 50%,
+    $color-bg-elevated 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}

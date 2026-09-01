@@ -1,0 +1,104 @@
+@use "styles/tokens" as *;
+@use "styles/mixins" as *;
+
+.game-card {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  min-width: 0;
+
+  &__cover {
+    position: relative;
+    aspect-ratio: $cover-aspect;
+    overflow: hidden;
+    border-radius: $radius-sm;
+    background-color: $color-bg-elevated;
+    box-shadow: $shadow-card;
+    transition: transform $transition-base;
+  }
+
+  &:hover &__cover {
+    transform: translateY(-2px);
+  }
+
+  &__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &__placeholder {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    color: $color-text-muted;
+
+    svg {
+      width: 28px;
+      height: 28px;
+    }
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-2;
+    min-width: 0;
+  }
+
+  &__title {
+    @include truncate;
+
+    font-size: $fs-base;
+    font-weight: $fw-medium;
+    color: $color-text-primary;
+  }
+
+  &__menu-trigger {
+    @include focus-ring;
+
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    border-radius: $radius-sm;
+    color: $color-text-secondary;
+    opacity: 0;
+    transition: opacity $transition-fast;
+
+    // Revealed on hover, but always present for keyboard users and while the
+    // menu is open — Radix sets data-state on the trigger.
+    .game-card:hover &,
+    &:focus-visible,
+    &[data-state="open"] {
+      opacity: 1;
+    }
+
+    &:hover {
+      background-color: $color-bg-hover;
+      color: $color-text-primary;
+    }
+
+    svg {
+      width: 15px;
+      height: 15px;
+    }
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $space-1 $space-3;
+    min-height: 18px;
+  }
+
+  &__year {
+    font-size: $fs-xs;
+    color: $color-text-muted;
+    font-variant-numeric: tabular-nums;
+  }
+}

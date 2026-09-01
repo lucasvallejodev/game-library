@@ -2,42 +2,14 @@ import { type Database, schema } from '@game-library/db'
 import { slugify } from '@game-library/shared'
 import { and, eq, inArray } from 'drizzle-orm'
 
+import { aliasForIgdbGenre } from './igdb-genres.js'
+
 /**
- * Map IGDB's genre names onto the user's own genre rows.
+ * Resolve IGDB genres to this user's own genre rows.
  *
- * IGDB names do not match our seeded defaults — it calls RPGs
- * "Role-playing (RPG)" and shooters "Shooter" — so a naive slug comparison
- * would create a near-duplicate beside every default. This alias table covers
- * IGDB's actual genre vocabulary; anything unlisted falls through to a slug
- * match and finally to creating a new genre, so a user's list grows to cover
- * what they own instead of silently dropping data.
+ * The alias table lives in igdb-genres.ts and is verified against IGDB's live
+ * genre list. See docs/adr.md ADR-018.
  */
-const IGDB_GENRE_ALIASES: Record<string, string> = {
-  'role-playing (rpg)': 'rpg',
-  'hack and slash/beat em up': 'action',
-  'hack and slash/beat -em up': 'action',
-  'real time strategy (rts)': 'strategy',
-  'turn-based strategy (tbs)': 'strategy',
-  'point-and-click': 'adventure',
-  shooter: 'shooter',
-  platform: 'platformer',
-  puzzle: 'puzzle',
-  racing: 'racing',
-  simulator: 'simulation',
-  sport: 'sports',
-  fighting: 'fighting',
-  adventure: 'adventure',
-  strategy: 'strategy',
-  indie: 'indie',
-  arcade: 'action',
-  tactical: 'strategy',
-  music: 'indie',
-  pinball: 'arcade',
-  quiz_trivia: 'puzzle',
-  'card & board game': 'strategy',
-  mmorpg: 'mmo',
-  'visual novel': 'adventure',
-}
 
 export interface IgdbGenreRef {
   igdbId: number
@@ -76,8 +48,7 @@ export async function resolveGenreIds(
       continue
     }
 
-    const aliasSlug = IGDB_GENRE_ALIASES[igdbGenre.name.toLowerCase()]
-    const candidateSlug = aliasSlug ?? slugify(igdbGenre.name)
+    const candidateSlug = aliasForIgdbGenre(igdbGenre.name) ?? slugify(igdbGenre.name)
     const matched = bySlug.get(candidateSlug)
 
     if (matched) {
