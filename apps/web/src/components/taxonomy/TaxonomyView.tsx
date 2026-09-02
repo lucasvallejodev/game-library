@@ -9,6 +9,7 @@ import { Topbar } from '@/components/layout/topbar/Topbar'
 import { TaxonomyRow } from '@/components/taxonomy/taxonomy-row/TaxonomyRow'
 import { TaxonomyDialog } from '@/components/taxonomy/taxonomy-dialog/TaxonomyDialog'
 import { Button } from '@/components/ui/button/Button'
+import { useConfirm } from '@/components/ui/confirm-dialog/ConfirmDialog'
 import {
   useDeleteTaxonomy,
   useTaxonomyList,
@@ -29,16 +30,17 @@ interface KindConfig {
   emptyDescription: string
   /**
    * What actually happens to the games when this row goes. The two kinds
-   * differ, and the difference is the thing people are afraid of.
+   * differ, and the difference is the thing people are afraid of. The name
+   * is already in the dialog title, so this is the consequence alone.
    */
   deleteWarning: (item: TaxonomyItem) => string
 }
 
 /** Games survive either kind of delete; only the filing changes. */
 function warning(item: TaxonomyItem, consequence: string): string {
-  if (item.gameCount === 0) return `Delete “${item.name}”?`
+  if (item.gameCount === 0) return 'Nothing is filed under it, so nothing else changes.'
   const plural = item.gameCount === 1 ? 'game stays' : 'games stay'
-  return `Delete “${item.name}”? Its ${String(item.gameCount)} ${plural} in your library, ${consequence}.`
+  return `Its ${String(item.gameCount)} ${plural} in your library, ${consequence}.`
 }
 
 /**
@@ -87,6 +89,7 @@ export function TaxonomyView({ kind, initialData }: TaxonomyViewProps) {
 
   const list = useTaxonomyList(kind, initialData)
   const remove = useDeleteTaxonomy(kind)
+  const confirm = useConfirm()
 
   const data = list.data ?? initialData
 
@@ -109,8 +112,13 @@ export function TaxonomyView({ kind, initialData }: TaxonomyViewProps) {
     setDialogOpen(true)
   }
 
-  function handleDelete(item: TaxonomyItem) {
-    if (!window.confirm(deleteWarning(item))) return
+  async function handleDelete(item: TaxonomyItem) {
+    const ok = await confirm({
+      title: `Delete “${item.name}”?`,
+      description: deleteWarning(item),
+      confirmLabel: `Delete ${noun}`,
+    })
+    if (!ok) return
 
     setError(null)
     remove.mutate(item.id, {
@@ -172,7 +180,7 @@ export function TaxonomyView({ kind, initialData }: TaxonomyViewProps) {
                   item={item}
                   busy={remove.isPending}
                   onRename={openRename}
-                  onDelete={handleDelete}
+                  onDelete={(item) => void handleDelete(item)}
                 />
               ))}
             </div>

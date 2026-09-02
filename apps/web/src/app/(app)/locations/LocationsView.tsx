@@ -9,6 +9,7 @@ import { LocationDialog } from '@/components/location/location-dialog/LocationDi
 import { EmptyState } from '@/components/layout/empty-state/EmptyState'
 import { Topbar } from '@/components/layout/topbar/Topbar'
 import { Button } from '@/components/ui/button/Button'
+import { useConfirm } from '@/components/ui/confirm-dialog/ConfirmDialog'
 import {
   useDeleteLocation,
   useLocations,
@@ -30,6 +31,7 @@ export function LocationsView({ initialData }: LocationsViewProps) {
   const locations = useLocations(initialData)
   const remove = useDeleteLocation()
   const uploadLogo = useUploadLocationLogo()
+  const confirm = useConfirm()
 
   const busy = remove.isPending || uploadLogo.isPending
   const data = locations.data ?? initialData
@@ -44,17 +46,20 @@ export function LocationsView({ initialData }: LocationsViewProps) {
     setDialogOpen(true)
   }
 
-  function handleDelete(location: Location) {
+  async function handleDelete(location: Location) {
     // Deleting a location does not delete its games — say so, because the
     // opposite is what people fear.
-    const message =
-      location.gameCount > 0
-        ? `Delete “${location.name}”? Its ${String(location.gameCount)} ${
-            location.gameCount === 1 ? 'game stays' : 'games stay'
-          } in your library, just unfiled.`
-        : `Delete “${location.name}”?`
-
-    if (!window.confirm(message)) return
+    const ok = await confirm({
+      title: `Delete “${location.name}”?`,
+      description:
+        location.gameCount > 0
+          ? `Its ${String(location.gameCount)} ${
+              location.gameCount === 1 ? 'game stays' : 'games stay'
+            } in your library, just no longer filed here.`
+          : 'Nothing is filed here, so nothing else changes.',
+      confirmLabel: 'Delete location',
+    })
+    if (!ok) return
 
     setError(null)
     remove.mutate(location.id, {
@@ -106,7 +111,7 @@ export function LocationsView({ initialData }: LocationsViewProps) {
               location={location}
               busy={busy}
               onEdit={openEdit}
-              onDelete={handleDelete}
+              onDelete={(location) => void handleDelete(location)}
               onUploadLogo={handleUploadLogo}
             />
           ))}

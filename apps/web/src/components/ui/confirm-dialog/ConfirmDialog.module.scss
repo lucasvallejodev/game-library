@@ -1,0 +1,89 @@
+@use "styles/tokens" as *;
+@use "styles/mixins" as *;
+
+.confirm {
+  &__overlay {
+    position: fixed;
+    inset: 0;
+    // Above every other modal: this can be raised from inside one.
+    z-index: $z-toast;
+    background-color: rgb(0 0 0 / 65%);
+    animation: fade-in $transition-base;
+  }
+
+  &__panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: $z-toast;
+    width: min(440px, calc(100vw - #{$space-8}));
+    padding: $space-5;
+    transform: translate(-50%, -50%);
+    background-color: $color-bg-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-popover;
+    animation: panel-in $transition-base;
+  }
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    gap: $space-3;
+    margin-bottom: $space-5;
+  }
+
+  &__icon {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: $radius-full;
+    color: $color-danger;
+    background-color: $color-danger-subtle;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  &__title {
+    font-size: $fs-md;
+    color: $color-text-primary;
+  }
+
+  &__description {
+    margin-top: $space-2;
+    font-size: $fs-sm;
+    line-height: $lh-normal;
+    color: $color-text-secondary;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $space-2;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}

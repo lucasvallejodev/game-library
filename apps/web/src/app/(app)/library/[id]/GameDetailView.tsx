@@ -21,6 +21,7 @@ import { useRouter } from 'next/navigation'
 import { useRef, useState, type CSSProperties } from 'react'
 
 import { EditGameDialog } from '@/components/game/edit-game-dialog/EditGameDialog'
+import { useConfirm } from '@/components/ui/confirm-dialog/ConfirmDialog'
 import {
   GameTypeItems,
   GenreItems,
@@ -84,6 +85,7 @@ export function GameDetailView({ initialData }: GameDetailViewProps) {
   const refresh = useRefreshIgdb(game.id)
   const uploadCover = useUploadCover(game.id)
   const remove = useDeleteGame()
+  const confirm = useConfirm()
 
   const cover = mediaUrl(game.coverUrl ?? game.thumbUrl)
   const releaseDate = formatDate(game.releaseDate)
@@ -116,14 +118,14 @@ export function GameDetailView({ initialData }: GameDetailViewProps) {
     })
   }
 
-  function handleDelete() {
-    if (
-      !window.confirm(
-        `Remove “${game.name}” from your library? This does not affect anything you own elsewhere.`,
-      )
-    ) {
-      return
-    }
+  async function handleDelete() {
+    const ok = await confirm({
+      title: `Remove “${game.name}”?`,
+      description:
+        'It leaves your library entirely, along with your notes on it. Anything you own elsewhere is untouched.',
+      confirmLabel: 'Remove',
+    })
+    if (!ok) return
 
     setError(null)
     remove.mutate(game.id, {
@@ -474,7 +476,7 @@ export function GameDetailView({ initialData }: GameDetailViewProps) {
                 {cover ? 'Replace cover' : 'Add a cover'}
               </Button>
 
-              <Button variant="danger" block disabled={busy} onClick={handleDelete}>
+              <Button variant="danger" block disabled={busy} onClick={() => void handleDelete()}>
                 <Trash2 aria-hidden="true" />
                 Remove from library
               </Button>

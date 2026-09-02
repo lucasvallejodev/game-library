@@ -9,6 +9,7 @@ import { FilterBar } from '@/components/game/filter-bar/FilterBar'
 import { GameGrid, type GameView } from '@/components/game/game-grid/GameGrid'
 import { EmptyState } from '@/components/layout/empty-state/EmptyState'
 import { Topbar } from '@/components/layout/topbar/Topbar'
+import { useConfirm } from '@/components/ui/confirm-dialog/ConfirmDialog'
 import { Button } from '@/components/ui/button/Button'
 import { useDeleteGame, useGames } from '@/features/library/queries'
 import { useLibraryFilters } from '@/features/library/useLibraryFilters'
@@ -36,10 +37,17 @@ export function LibraryView({ initialData, initialQuery }: LibraryViewProps) {
   const data = games.data ?? { data: [], meta: { page: 1, perPage: 40, total: 0, totalPages: 1 } }
   const isFiltered = filters.q.length > 0 || activeCount > 0
   const isEmpty = data.data.length === 0 && !games.isPending
+  const confirm = useConfirm()
 
-  function handleDelete(game: GameCard) {
+  async function handleDelete(game: GameCard) {
     // A game is cheap to re-add from IGDB, but silently vanishing is alarming.
-    if (!window.confirm(`Remove “${game.name}” from your library?`)) return
+    const ok = await confirm({
+      title: `Remove “${game.name}”?`,
+      description:
+        'It leaves your library entirely. Anything you own elsewhere is untouched, and an IGDB game can be added back in a few clicks.',
+      confirmLabel: 'Remove',
+    })
+    if (!ok) return
     deleteGame.mutate(game.id)
   }
 
@@ -103,7 +111,7 @@ export function LibraryView({ initialData, initialQuery }: LibraryViewProps) {
           data={data}
           view={view}
           loading={games.isPending || games.isFetching}
-          onDelete={handleDelete}
+          onDelete={(game) => void handleDelete(game)}
           onPageChange={setPage}
         />
       )}

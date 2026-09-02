@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import type { ReactNode } from 'react'
 
+import { ConfirmProvider } from '@/components/ui/confirm-dialog/ConfirmDialog'
 import { QueryProvider } from '@/lib/query-client'
 
 import '@/styles/globals.scss'
@@ -25,7 +26,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={inter.variable}>
       <body>
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <ConfirmProvider>{children}</ConfirmProvider>
+        </QueryProvider>
       </body>
     </html>
   )

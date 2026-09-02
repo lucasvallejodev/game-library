@@ -8,6 +8,7 @@ import { AddGameDialog } from '@/components/game/add-game-dialog/AddGameDialog'
 import { WishlistCard } from '@/components/game/wishlist-card/WishlistCard'
 import { EmptyState } from '@/components/layout/empty-state/EmptyState'
 import { Topbar } from '@/components/layout/topbar/Topbar'
+import { useConfirm } from '@/components/ui/confirm-dialog/ConfirmDialog'
 import { Button } from '@/components/ui/button/Button'
 import {
   usePromoteWishlistItem,
@@ -30,6 +31,7 @@ export function WishlistView({ initialData, initialQuery }: WishlistViewProps) {
   const query = useWishlist(initialQuery, initialData)
   const promote = usePromoteWishlistItem()
   const remove = useRemoveFromWishlist()
+  const confirm = useConfirm()
 
   const data = query.data ?? initialData
   const busy = promote.isPending || remove.isPending
@@ -50,8 +52,13 @@ export function WishlistView({ initialData, initialQuery }: WishlistViewProps) {
     )
   }
 
-  function handleRemove(item: WishlistItem) {
-    if (!window.confirm(`Remove “${item.name}” from your wishlist?`)) return
+  async function handleRemove(item: WishlistItem) {
+    const ok = await confirm({
+      title: `Remove “${item.name}” from your wishlist?`,
+      description: 'You can add it back from IGDB at any time.',
+      confirmLabel: 'Remove',
+    })
+    if (!ok) return
     setError(null)
     remove.mutate(item.id)
   }
@@ -96,7 +103,7 @@ export function WishlistView({ initialData, initialQuery }: WishlistViewProps) {
               item={item}
               busy={busy}
               onPromote={handlePromote}
-              onRemove={handleRemove}
+              onRemove={(item) => void handleRemove(item)}
             />
           ))}
         </div>
