@@ -1,0 +1,81 @@
+@use "styles/tokens" as *;
+@use "styles/mixins" as *;
+
+.taxonomy {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+
+  &__error {
+    margin-bottom: $space-4;
+    padding: $space-3;
+    font-size: $fs-sm;
+    color: $color-danger;
+    background-color: $color-danger-subtle;
+    border-radius: $radius-sm;
+  }
+
+  &__filter {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    padding: 0 $space-3;
+    background-color: $color-bg-elevated;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+
+    &:focus-within {
+      border-color: $color-accent;
+    }
+  }
+
+  &__filter-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: $color-text-muted;
+  }
+
+  &__filter-input {
+    flex: 1;
+    min-width: 0;
+    padding: $space-2 0;
+    font-size: $fs-sm;
+    color: $color-text-primary;
+    background: none;
+    border: none;
+
+    &:focus {
+      outline: none;
+    }
+
+    &::placeholder {
+      color: $color-text-muted;
+    }
+
+    // The browser's own clear affordance sits badly on a dark field.
+    &::-webkit-search-cancel-button {
+      appearance: none;
+    }
+  }
+
+  &__count {
+    flex-shrink: 0;
+    font-size: $fs-xs;
+    color: $color-text-muted;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__none {
+    padding: $space-6 0;
+    text-align: center;
+    font-size: $fs-sm;
+    color: $color-text-muted;
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+  }
+}

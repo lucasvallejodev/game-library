@@ -1,19 +1,22 @@
-import { Gamepad2 } from 'lucide-react'
+import type { GameType } from '@game-library/shared/schemas'
 
-import { EmptyState } from '@/components/layout/empty-state/EmptyState'
-import { Topbar } from '@/components/layout/topbar/Topbar'
+import { TaxonomyView } from '@/components/taxonomy/TaxonomyView'
+import { apiFetch } from '@/lib/api-client'
+import { forwardedCookie } from '@/lib/session'
 
 export const metadata = { title: 'Game Types · Game Library' }
 
-export default function Page() {
-  return (
-    <>
-      <Topbar title="Game Types" />
-      <EmptyState
-        icon={Gamepad2}
-        title="Game Types"
-        description="Physical, Digital, Subscription and Emulated are seeded for you. Add your own here."
-      />
-    </>
-  )
+export default async function GameTypesPage() {
+  let initialData: GameType[] = []
+  try {
+    initialData = (
+      await apiFetch<{ data: GameType[] }>('/api/game-types', { cookie: await forwardedCookie() })
+    ).data
+  } catch {
+    // Render the shell rather than an error page if the API is unreachable.
+  }
+
+  // Only serialisable props cross this boundary — the icon and the delete copy
+  // live inside TaxonomyView, which is a client component.
+  return <TaxonomyView kind="game-types" initialData={initialData} />
 }

@@ -13,6 +13,8 @@ export interface TopbarProps {
   view?: 'grid' | 'list'
   onViewChange?: (view: 'grid' | 'list') => void
   onAdd?: () => void
+  /** Screen-reader label for the add button; the icon alone is ambiguous. */
+  addLabel?: string
   onToggleFilters?: () => void
   filtersOpen?: boolean
 }
@@ -27,6 +29,7 @@ export function Topbar({
   view = 'grid',
   onViewChange,
   onAdd,
+  addLabel = 'Add a game',
   onToggleFilters,
   filtersOpen = false,
 }: TopbarProps) {
@@ -44,7 +47,7 @@ export function Topbar({
             type="button"
             className={styles['icon-button']}
             onClick={onAdd}
-            aria-label="Add a game"
+            aria-label={addLabel}
           >
             <Plus aria-hidden="true" />
           </button>
