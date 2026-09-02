@@ -1,0 +1,197 @@
+@use "styles/tokens" as *;
+@use "styles/mixins" as *;
+
+.dialog {
+  &__overlay {
+    position: fixed;
+    inset: 0;
+    z-index: $z-modal;
+    background-color: rgb(0 0 0 / 60%);
+    animation: fade-in $transition-base;
+  }
+
+  &__panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: $z-modal;
+    width: min(440px, calc(100vw - #{$space-8}));
+    padding: $space-5;
+    transform: translate(-50%, -50%);
+    background-color: $color-bg-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-popover;
+    animation: panel-in $transition-base;
+  }
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: $space-3;
+    margin-bottom: $space-5;
+  }
+
+  &__title {
+    font-size: $fs-md;
+  }
+
+  &__description {
+    margin-top: $space-1;
+    font-size: $fs-sm;
+    color: $color-text-secondary;
+  }
+
+  &__close {
+    @include focus-ring;
+
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    border-radius: $radius-sm;
+    color: $color-text-secondary;
+
+    &:hover {
+      background-color: $color-bg-hover;
+      color: $color-text-primary;
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+  }
+
+  &__label {
+    font-size: $fs-sm;
+    font-weight: $fw-medium;
+    color: $color-text-secondary;
+  }
+
+  &__input {
+    @include focus-ring(0);
+
+    padding: $space-3;
+    font-size: $fs-base;
+    color: $color-text-primary;
+    background-color: $color-bg-elevated;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+
+    &::placeholder {
+      color: $color-text-muted;
+    }
+    &:focus {
+      border-color: $color-accent;
+    }
+  }
+
+  &__error {
+    padding: $space-3;
+    font-size: $fs-sm;
+    color: $color-danger;
+    background-color: $color-danger-subtle;
+    border-radius: $radius-sm;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $space-2;
+    margin-top: $space-2;
+  }
+}
+
+.colour {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+
+  &__swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-2;
+    flex: 1;
+  }
+
+  &__swatch {
+    @include focus-ring;
+
+    width: 24px;
+    height: 24px;
+    border-radius: $radius-full;
+    border: 2px solid transparent;
+    background-color: var(--swatch);
+    transition: transform $transition-fast;
+
+    &:hover {
+      transform: scale(1.12);
+    }
+
+    &--selected {
+      border-color: $color-text-primary;
+    }
+  }
+
+  // The native picker, restyled: it is the only control that gives a full
+  // gamut without shipping a colour-picker dependency.
+  &__native {
+    @include focus-ring;
+
+    width: 40px;
+    height: 32px;
+    flex-shrink: 0;
+    padding: 0;
+    background: none;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    cursor: pointer;
+
+    &::-webkit-color-swatch-wrapper {
+      padding: 3px;
+    }
+    &::-webkit-color-swatch {
+      border: none;
+      border-radius: 3px;
+    }
+    &::-moz-color-swatch {
+      border: none;
+      border-radius: 3px;
+    }
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}

@@ -26,7 +26,34 @@ async function redisPlugin(app: FastifyInstance): Promise<void> {
     app.log.error({ err: error }, 'redis error')
   })
 
-  await redis.connect()
+  /**
+   * Retry the initial connection before giving up.
+   *
+   * Redis is usually still accepting its first connections when the API boots
+   * — `docker compose up -d` and `pnpm dev` race, and in production a restart
+   * brings the API back before Redis is ready. A single `connect()` turned
+   * that ordinary race into a permanent, silent death of the process.
+   *
+   * Bounded on purpose: a genuinely wrong REDIS_URL should still fail the boot
+   * loudly rather than retry forever.
+   */
+  const attempts = 10
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      await redis.connect()
+      break
+    } catch (error) {
+      if (attempt === attempts) {
+        app.log.fatal({ err: error }, `Redis unreachable after ${String(attempts)} attempts`)
+        throw error
+      }
+      app.log.warn(
+        { attempt, of: attempts },
+        'Redis not ready yet; retrying the initial connection',
+      )
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+    }
+  }
 
   app.decorate('redis', redis)
   app.decorate('redisPing', async () => {
