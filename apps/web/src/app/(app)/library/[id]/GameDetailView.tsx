@@ -20,6 +20,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useRef, useState, type CSSProperties } from 'react'
 
+import { EditGameDialog } from '@/components/game/edit-game-dialog/EditGameDialog'
 import {
   GameTypeItems,
   GenreItems,
@@ -73,6 +74,7 @@ export function GameDetailView({ initialData }: GameDetailViewProps) {
 
   const [error, setError] = useState<string | null>(null)
   const [editingNotes, setEditingNotes] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
   const [draft, setDraft] = useState('')
 
   const query = useGame(initialData.id, initialData)
@@ -218,7 +220,20 @@ export function GameDetailView({ initialData }: GameDetailViewProps) {
           </div>
 
           <div className={styles.hero__body}>
-            <h1 className={styles.hero__title}>{game.name}</h1>
+            <div className={styles.hero__heading}>
+              <h1 className={styles.hero__title}>{game.name}</h1>
+              <button
+                type="button"
+                className={styles.hero__edit}
+                disabled={busy}
+                onClick={() => {
+                  setEditOpen(true)
+                }}
+              >
+                <Pencil aria-hidden="true" />
+                Edit
+              </button>
+            </div>
 
             <div className={styles.hero__facts}>
               {year && <span className={styles.hero__fact}>{year}</span>}
@@ -427,6 +442,17 @@ export function GameDetailView({ initialData }: GameDetailViewProps) {
             <div className={styles.side__actions}>
               <Button
                 block
+                disabled={busy}
+                onClick={() => {
+                  setEditOpen(true)
+                }}
+              >
+                <Pencil aria-hidden="true" />
+                Edit name, summary and dates
+              </Button>
+
+              <Button
+                block
                 disabled={busy || game.igdbId === null}
                 title={
                   game.igdbId === null
@@ -461,6 +487,8 @@ export function GameDetailView({ initialData }: GameDetailViewProps) {
           </section>
         </aside>
       </div>
+
+      <EditGameDialog game={game} open={editOpen} onOpenChange={setEditOpen} />
     </div>
   )
 }

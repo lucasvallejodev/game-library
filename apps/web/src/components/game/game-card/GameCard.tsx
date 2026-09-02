@@ -2,12 +2,14 @@
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import type { GameCard as GameCardData } from '@game-library/shared/schemas'
-import { Gamepad2, Info, MoreHorizontal, Trash2 } from 'lucide-react'
+import { Gamepad2, Info, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 
+import { EditGameDialog } from '@/components/game/edit-game-dialog/EditGameDialog'
 import { GameTaxonomySubmenus } from '@/components/game/game-taxonomy/GameTaxonomyItems'
 import { LocationChip } from '@/components/game/location-chip/LocationChip'
 import { mediaUrl } from '@/lib/api-client'
+import { useState } from 'react'
 
 import menuStyles from '@/components/ui/dropdown-menu/DropdownMenu.module.scss'
 import styles from './GameCard.module.scss'
@@ -22,6 +24,7 @@ export interface GameCardProps {
  * chips — the card anatomy from the reference.
  */
 export function GameCard({ game, onDelete }: GameCardProps) {
+  const [editOpen, setEditOpen] = useState(false)
   const cover = mediaUrl(game.thumbUrl ?? game.coverUrl)
   const year = game.releaseDate?.slice(0, 4)
 
@@ -80,6 +83,16 @@ export function GameCard({ game, onDelete }: GameCardProps) {
                 </Link>
               </DropdownMenu.Item>
 
+              <DropdownMenu.Item
+                className={menuStyles.menu__item}
+                onSelect={() => {
+                  setEditOpen(true)
+                }}
+              >
+                <Pencil aria-hidden="true" />
+                Edit details
+              </DropdownMenu.Item>
+
               <DropdownMenu.Separator className={menuStyles.menu__separator} />
               <DropdownMenu.Label className={menuStyles.menu__label}>Filing</DropdownMenu.Label>
 
@@ -101,6 +114,10 @@ export function GameCard({ game, onDelete }: GameCardProps) {
             </DropdownMenu.Content>
           </DropdownMenu.Portal>
         </DropdownMenu.Root>
+
+        {/* The card carries only the summary-shaped fields, which is exactly
+            what this dialog edits. */}
+        <EditGameDialog game={game} open={editOpen} onOpenChange={setEditOpen} />
       </div>
 
       <div className={styles['game-card__meta']}>

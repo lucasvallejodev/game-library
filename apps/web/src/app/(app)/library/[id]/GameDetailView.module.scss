@@ -160,6 +160,47 @@
     justify-content: center;
   }
 
+  &__heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: $space-3;
+  }
+
+  &__edit {
+    @include focus-ring;
+
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2;
+    flex-shrink: 0;
+    margin-top: $space-1;
+    padding: $space-1 $space-3;
+    font-size: $fs-xs;
+    color: $color-text-secondary;
+    background-color: rgb(255 255 255 / 8%);
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    transition:
+      background-color $transition-fast,
+      color $transition-fast;
+
+    &:hover:not(:disabled) {
+      background-color: $color-bg-hover;
+      color: $color-text-primary;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    svg {
+      width: 13px;
+      height: 13px;
+    }
+  }
+
   &__title {
     font-size: $fs-2xl;
     font-weight: $fw-semibold;
