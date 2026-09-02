@@ -27,9 +27,51 @@
 }
 
 // Fourteen seeded genres plus whatever the user adds outgrows a menu quickly.
+// The filter above appears at exactly the count where this starts scrolling.
 .scroll {
   @include custom-scrollbar;
 
   max-height: 320px;
   overflow-y: auto;
+}
+
+.filter {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  margin-bottom: $space-1;
+  padding: 0 $space-2;
+  // Stays put while the list scrolls beneath it.
+  background-color: $color-bg-elevated;
+  border: 1px solid $color-border;
+  border-radius: $radius-sm;
+
+  &:focus-within {
+    border-color: $color-accent;
+  }
+
+  &__icon {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+    color: $color-text-muted;
+  }
+
+  &__input {
+    flex: 1;
+    min-width: 0;
+    padding: $space-2 0;
+    font-size: $fs-sm;
+    color: $color-text-primary;
+    background: none;
+    border: none;
+
+    &:focus {
+      outline: none;
+    }
+
+    &::placeholder {
+      color: $color-text-muted;
+    }
+  }
 }

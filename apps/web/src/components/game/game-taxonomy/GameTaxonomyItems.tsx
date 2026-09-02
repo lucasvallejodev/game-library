@@ -1,8 +1,8 @@
 'use client'
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { Check, Gamepad2, HardDrive, Tags } from 'lucide-react'
-import type { CSSProperties } from 'react'
+import { Check, Gamepad2, HardDrive, Search, Tags } from 'lucide-react'
+import { useState, type CSSProperties, type ReactNode } from 'react'
 
 import {
   useGameTaxonomy,
@@ -18,6 +18,13 @@ export interface GameTaxonomyItemsProps {
 }
 
 /**
+ * Above this many rows the list scrolls, so it also gets a filter. Matches the
+ * max-height in the stylesheet: the filter appears exactly when a scrollbar
+ * would otherwise be the only way through the list.
+ */
+const FILTER_THRESHOLD = 8
+
+/**
  * Toggling must not close the menu — filing a game usually means picking more
  * than one thing, and a menu that shuts after every click makes that four
  * round trips instead of one.
@@ -30,24 +37,93 @@ function Empty({ children }: { children: string }) {
   return <div className={styles.empty}>{children}</div>
 }
 
+interface PickerListProps<T> {
+  items: T[]
+  noun: string
+  loading: boolean
+  emptyMessage: string
+  renderItem: (item: T) => ReactNode
+  /** Rendered under the list — the "Clear game type" escape hatch. */
+  footer?: ReactNode
+}
+
+/**
+ * The scrolling body shared by all three pickers, with a filter that appears
+ * only once the list outgrows its container.
+ */
+function PickerList<T extends { id: string; name: string }>({
+  items,
+  noun,
+  loading,
+  emptyMessage,
+  renderItem,
+  footer,
+}: PickerListProps<T>) {
+  const [filter, setFilter] = useState('')
+
+  if (loading) return <Empty>Loading…</Empty>
+  if (items.length === 0) return <Empty>{emptyMessage}</Empty>
+
+  const showFilter = items.length > FILTER_THRESHOLD
+  const needle = filter.trim().toLowerCase()
+  const visible = needle ? items.filter((item) => item.name.toLowerCase().includes(needle)) : items
+
+  return (
+    <>
+      {showFilter && (
+        <div className={styles.filter}>
+          <Search className={styles.filter__icon} aria-hidden="true" />
+          <input
+            className={styles.filter__input}
+            type="text"
+            placeholder={`Filter ${noun}…`}
+            aria-label={`Filter ${noun}`}
+            value={filter}
+            onChange={(event) => {
+              setFilter(event.target.value)
+            }}
+            onKeyDown={(event) => {
+              // The menu's own typeahead would otherwise swallow these
+              // keystrokes and jump between items instead of typing. Escape
+              // is left alone so it still closes the menu.
+              if (event.key !== 'Escape') event.stopPropagation()
+            }}
+          />
+        </div>
+      )}
+
+      <div className={styles.scroll}>
+        {visible.length === 0 ? (
+          <Empty>{`Nothing matches “${filter.trim()}”.`}</Empty>
+        ) : (
+          visible.map(renderItem)
+        )}
+      </div>
+
+      {footer}
+    </>
+  )
+}
+
+function itemClass(checked: boolean): string {
+  return `${menuStyles.menu__item} ${checked ? menuStyles['menu__item--checked'] : ''}`
+}
+
 /** Locations, multi-select. */
 export function LocationItems({ game, onError }: GameTaxonomyItemsProps) {
   const editor = useGameTaxonomy(game, onError)
   const selected = new Set(game.locations.map((l) => l.id))
 
-  if (editor.loading) return <Empty>Loading…</Empty>
-  if (editor.locations.length === 0) {
-    return <Empty>No locations yet. Create one on the Locations screen.</Empty>
-  }
-
   return (
-    <>
-      {editor.locations.map((location) => (
+    <PickerList
+      items={editor.locations}
+      noun="locations"
+      loading={editor.loading}
+      emptyMessage="No locations yet. Create one on the Locations screen."
+      renderItem={(location) => (
         <DropdownMenu.CheckboxItem
           key={location.id}
-          className={`${menuStyles.menu__item} ${
-            selected.has(location.id) ? menuStyles['menu__item--checked'] : ''
-          }`}
+          className={itemClass(selected.has(location.id))}
           checked={selected.has(location.id)}
           disabled={editor.pending}
           onSelect={keepOpen}
@@ -65,8 +141,8 @@ export function LocationItems({ game, onError }: GameTaxonomyItemsProps) {
             <Check className={menuStyles.menu__check} aria-hidden="true" />
           )}
         </DropdownMenu.CheckboxItem>
-      ))}
-    </>
+      )}
+    />
   )
 }
 
@@ -75,19 +151,16 @@ export function GameTypeItems({ game, onError }: GameTaxonomyItemsProps) {
   const editor = useGameTaxonomy(game, onError)
   const current = game.gameType?.id ?? null
 
-  if (editor.loading) return <Empty>Loading…</Empty>
-  if (editor.gameTypes.length === 0) {
-    return <Empty>No game types yet. Create one on the Game Types screen.</Empty>
-  }
-
   return (
-    <>
-      {editor.gameTypes.map((type) => (
+    <PickerList
+      items={editor.gameTypes}
+      noun="game types"
+      loading={editor.loading}
+      emptyMessage="No game types yet. Create one on the Game Types screen."
+      renderItem={(type) => (
         <DropdownMenu.CheckboxItem
           key={type.id}
-          className={`${menuStyles.menu__item} ${
-            current === type.id ? menuStyles['menu__item--checked'] : ''
-          }`}
+          className={itemClass(current === type.id)}
           checked={current === type.id}
           disabled={editor.pending}
           onSelect={keepOpen}
@@ -100,21 +173,23 @@ export function GameTypeItems({ game, onError }: GameTaxonomyItemsProps) {
           {type.name}
           {current === type.id && <Check className={menuStyles.menu__check} aria-hidden="true" />}
         </DropdownMenu.CheckboxItem>
-      ))}
-
-      <DropdownMenu.Separator className={menuStyles.menu__separator} />
-
-      <DropdownMenu.Item
-        className={menuStyles.menu__item}
-        disabled={editor.pending || current === null}
-        onSelect={keepOpen}
-        onClick={() => {
-          editor.setGameType(null)
-        }}
-      >
-        Clear game type
-      </DropdownMenu.Item>
-    </>
+      )}
+      footer={
+        <>
+          <DropdownMenu.Separator className={menuStyles.menu__separator} />
+          <DropdownMenu.Item
+            className={menuStyles.menu__item}
+            disabled={editor.pending || current === null}
+            onSelect={keepOpen}
+            onClick={() => {
+              editor.setGameType(null)
+            }}
+          >
+            Clear game type
+          </DropdownMenu.Item>
+        </>
+      }
+    />
   )
 }
 
@@ -123,19 +198,16 @@ export function GenreItems({ game, onError }: GameTaxonomyItemsProps) {
   const editor = useGameTaxonomy(game, onError)
   const selected = new Set(game.genres.map((g) => g.id))
 
-  if (editor.loading) return <Empty>Loading…</Empty>
-  if (editor.genres.length === 0) {
-    return <Empty>No genres yet. Create one on the Genres screen.</Empty>
-  }
-
   return (
-    <div className={styles.scroll}>
-      {editor.genres.map((genre) => (
+    <PickerList
+      items={editor.genres}
+      noun="genres"
+      loading={editor.loading}
+      emptyMessage="No genres yet. Create one on the Genres screen."
+      renderItem={(genre) => (
         <DropdownMenu.CheckboxItem
           key={genre.id}
-          className={`${menuStyles.menu__item} ${
-            selected.has(genre.id) ? menuStyles['menu__item--checked'] : ''
-          }`}
+          className={itemClass(selected.has(genre.id))}
           checked={selected.has(genre.id)}
           disabled={editor.pending}
           onSelect={keepOpen}
@@ -148,8 +220,8 @@ export function GenreItems({ game, onError }: GameTaxonomyItemsProps) {
             <Check className={menuStyles.menu__check} aria-hidden="true" />
           )}
         </DropdownMenu.CheckboxItem>
-      ))}
-    </div>
+      )}
+    />
   )
 }
 
