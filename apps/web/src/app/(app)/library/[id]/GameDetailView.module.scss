@@ -1,0 +1,450 @@
+@use "sass:math";
+@use "styles/tokens" as *;
+@use "styles/mixins" as *;
+@use "styles/breakpoints" as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: $space-5;
+
+  &__back {
+    @include focus-ring;
+
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2;
+    align-self: flex-start;
+    font-size: $fs-sm;
+    color: $color-text-secondary;
+    border-radius: $radius-sm;
+
+    &:hover {
+      color: $color-text-primary;
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &__error {
+    padding: $space-3;
+    font-size: $fs-sm;
+    color: $color-danger;
+    background-color: $color-danger-subtle;
+    border-radius: $radius-sm;
+  }
+}
+
+// ── Hero ────────────────────────────────────────────────────────────────────
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: $radius-lg;
+  background-color: $color-bg-elevated;
+  border: 1px solid $color-border;
+
+  &__backdrop {
+    position: absolute;
+    // Overdrawn on every side so the blur never reveals a soft edge.
+    inset: -40px;
+    background-image: var(--backdrop);
+    background-size: cover;
+    background-position: center 25%;
+    filter: blur(40px) saturate(140%);
+    opacity: 0.35;
+    transform: scale(1.1);
+  }
+
+  &__inner {
+    position: relative;
+    display: flex;
+    gap: $space-6;
+    padding: $space-6;
+    // Keeps the title legible over whatever the cover happens to be.
+    background: linear-gradient(
+      to right,
+      rgb(0 0 0 / 78%) 0%,
+      rgb(0 0 0 / 62%) 55%,
+      rgb(0 0 0 / 35%) 100%
+    );
+
+    @include below($bp-md) {
+      flex-direction: column;
+      gap: $space-4;
+      padding: $space-4;
+    }
+  }
+
+  &__cover {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+    width: 200px;
+    flex-shrink: 0;
+
+    @include below($bp-md) {
+      width: 140px;
+    }
+  }
+
+  &__image {
+    width: 100%;
+    aspect-ratio: math.div(3, 4);
+    object-fit: cover;
+    border-radius: $radius-md;
+    box-shadow: $shadow-card;
+  }
+
+  &__placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: $space-2;
+    width: 100%;
+    aspect-ratio: math.div(3, 4);
+    color: $color-text-muted;
+    font-size: $fs-xs;
+    background-color: $color-bg-surface;
+    border: 1px dashed $color-border-strong;
+    border-radius: $radius-md;
+
+    svg {
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  &__replace {
+    @include focus-ring;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $space-2;
+    padding: $space-2;
+    font-size: $fs-xs;
+    color: $color-text-secondary;
+    background-color: rgb(0 0 0 / 40%);
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    transition:
+      background-color $transition-fast,
+      color $transition-fast;
+
+    &:hover:not(:disabled) {
+      background-color: $color-bg-hover;
+      color: $color-text-primary;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+    min-width: 0;
+    justify-content: center;
+  }
+
+  &__title {
+    font-size: $fs-2xl;
+    font-weight: $fw-semibold;
+    line-height: $lh-tight;
+    color: $color-text-primary;
+    text-wrap: balance;
+  }
+
+  &__facts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $space-2 $space-3;
+    font-size: $fs-sm;
+    color: $color-text-secondary;
+  }
+
+  &__fact {
+    padding: 2px $space-2;
+    background-color: rgb(255 255 255 / 8%);
+    border-radius: $radius-sm;
+  }
+
+  &__summary {
+    @include line-clamp(6);
+
+    max-width: 70ch;
+    font-size: $fs-sm;
+    line-height: $lh-normal;
+    color: $color-text-secondary;
+  }
+
+  &__muted {
+    font-size: $fs-sm;
+    font-style: italic;
+    color: $color-text-muted;
+  }
+}
+
+.score {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  padding: 2px $space-2;
+  color: $color-warning;
+  background-color: rgb(255 255 255 / 8%);
+  border-radius: $radius-sm;
+
+  strong {
+    font-size: $fs-md;
+    font-weight: $fw-semibold;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__scale {
+    font-size: $fs-xs;
+    color: $color-text-muted;
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+
+  &__tag {
+    padding: 2px $space-2;
+    font-size: $fs-xs;
+    color: $color-text-secondary;
+    background-color: rgb(255 255 255 / 10%);
+    border-radius: $radius-sm;
+  }
+}
+
+// ── Two columns ─────────────────────────────────────────────────────────────
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: $space-5;
+  align-items: start;
+
+  @include below($bp-lg) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.main,
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+  min-width: 0;
+}
+
+.panel {
+  padding: $space-5;
+  background-color: $color-bg-elevated;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-3;
+    margin-bottom: $space-4;
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    margin-bottom: $space-4;
+    font-size: $fs-sm;
+    font-weight: $fw-semibold;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: $color-text-secondary;
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  // The header already provides the gap when it wraps the title.
+  &__header &__title {
+    margin-bottom: 0;
+  }
+
+  &__action {
+    @include focus-ring;
+
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2;
+    padding: $space-1 $space-2;
+    font-size: $fs-xs;
+    color: $color-text-secondary;
+    border-radius: $radius-sm;
+
+    &:hover:not(:disabled) {
+      background-color: $color-bg-hover;
+      color: $color-text-primary;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  &__empty {
+    font-size: $fs-sm;
+    color: $color-text-muted;
+  }
+}
+
+// ── Notes editor ────────────────────────────────────────────────────────────
+
+.notes {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+
+  &__input {
+    @include focus-ring(0);
+
+    width: 100%;
+    padding: $space-3;
+    font-family: ui-monospace, "SFMono-Regular", monospace;
+    font-size: $fs-sm;
+    line-height: $lh-normal;
+    color: $color-text-primary;
+    background-color: $color-bg-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    resize: vertical;
+
+    &::placeholder {
+      color: $color-text-muted;
+    }
+    &:focus {
+      border-color: $color-accent;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $space-2;
+  }
+}
+
+// ── Fact lists ──────────────────────────────────────────────────────────────
+
+.facts {
+  display: flex;
+  flex-direction: column;
+
+  &__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: $space-4;
+    padding: $space-2 0;
+    border-bottom: 1px solid $color-border;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__label {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    flex-shrink: 0;
+    font-size: $fs-xs;
+    color: $color-text-muted;
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  &__value {
+    font-size: $fs-sm;
+    color: $color-text-primary;
+    text-align: right;
+    overflow-wrap: anywhere;
+
+    &--mono {
+      font-family: ui-monospace, "SFMono-Regular", monospace;
+      font-size: $fs-xs;
+    }
+  }
+}
+
+// ── Side column ─────────────────────────────────────────────────────────────
+
+.side {
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-2;
+    margin-bottom: $space-4;
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+  }
+
+  &__note {
+    margin-top: $space-3;
+    font-size: $fs-xs;
+    line-height: $lh-normal;
+    color: $color-text-muted;
+  }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+.sr-only {
+  @include visually-hidden;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

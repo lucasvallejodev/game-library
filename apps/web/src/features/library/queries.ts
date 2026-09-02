@@ -20,6 +20,7 @@ import { apiFetch } from '@/lib/api-client'
  */
 export const queryKeys = {
   games: (apiQuery: string) => ['games', apiQuery] as const,
+  game: (id: string) => ['games', 'detail', id] as const,
   taxonomy: ['taxonomy'] as const,
   igdbSearch: (q: string) => ['igdb', 'search', q] as const,
 }
@@ -105,5 +106,88 @@ export function useDeleteGame() {
       ])
       router.refresh()
     },
+  })
+}
+
+/**
+ * One game, with everything the detail page shows.
+ *
+ * Keyed under `['games', ...]` so any mutation that invalidates the library
+ * refreshes an open detail page too.
+ */
+export function useGame(id: string, initialData?: GameDetail) {
+  return useQuery({
+    queryKey: queryKeys.game(id),
+    queryFn: () => apiFetch<GameDetail>(`/api/games/${id}`),
+    ...(initialData ? { initialData } : {}),
+  })
+}
+
+/**
+ * Shared by every mutation on the detail page: a change to one game moves the
+ * grid, the taxonomy counts and the server-rendered sidebar total.
+ */
+function useGameInvalidate(id: string) {
+  const client = useQueryClient()
+  const router = useRouter()
+
+  return async () => {
+    await Promise.all([
+      client.invalidateQueries({ queryKey: queryKeys.game(id) }),
+      client.invalidateQueries({ queryKey: ['games'] }),
+      client.invalidateQueries({ queryKey: queryKeys.taxonomy }),
+    ])
+    router.refresh()
+  }
+}
+
+export function useUpdateGame(id: string) {
+  const invalidate = useGameInvalidate(id)
+
+  return useMutation({
+    mutationFn: (body: Record<string, unknown>) =>
+      apiFetch<GameDetail>(`/api/games/${id}`, { method: 'PATCH', body }),
+    onSuccess: invalidate,
+  })
+}
+
+/** Re-pulls IGDB metadata. The API never overwrites notes, locations or type. */
+export function useRefreshIgdb(id: string) {
+  const invalidate = useGameInvalidate(id)
+
+  return useMutation({
+    mutationFn: () => apiFetch<GameDetail>(`/api/games/${id}/refresh-igdb`, { method: 'POST' }),
+    onSuccess: invalidate,
+  })
+}
+
+/** Cover upload is multipart, so it bypasses apiFetch's JSON body handling. */
+export function useUploadCover(id: string) {
+  const invalidate = useGameInvalidate(id)
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'
+
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const form = new FormData()
+      form.append('file', file)
+
+      const response = await fetch(`${apiUrl}/api/games/${id}/cover`, {
+        method: 'POST',
+        body: form,
+        credentials: 'include',
+        // The API checks Origin on state-changing requests.
+        headers: { origin: window.location.origin },
+      })
+
+      if (!response.ok) {
+        const body = (await response.json().catch(() => null)) as {
+          error?: { message?: string }
+        } | null
+        throw new Error(body?.error?.message ?? 'Could not upload that image')
+      }
+
+      return (await response.json()) as GameDetail
+    },
+    onSuccess: invalidate,
   })
 }

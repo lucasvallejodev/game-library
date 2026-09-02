@@ -1,0 +1,35 @@
+@use "styles/tokens" as *;
+@use "styles/mixins" as *;
+
+// The location's own colour, shown beside the name and never instead of it —
+// user-chosen hex has no guaranteed contrast.
+.dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: $radius-full;
+  background-color: var(--dot-color);
+  border: 1px solid rgb(255 255 255 / 25%);
+}
+
+.chevron {
+  margin-left: auto;
+  padding-left: $space-2;
+  color: $color-text-muted;
+}
+
+.empty {
+  padding: $space-3;
+  max-width: 220px;
+  font-size: $fs-xs;
+  line-height: $lh-normal;
+  color: $color-text-muted;
+}
+
+// Fourteen seeded genres plus whatever the user adds outgrows a menu quickly.
+.scroll {
+  @include custom-scrollbar;
+
+  max-height: 320px;
+  overflow-y: auto;
+}
